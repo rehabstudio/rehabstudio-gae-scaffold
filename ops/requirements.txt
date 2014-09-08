@@ -1,0 +1,11 @@
+# Python requirements that will be installed using `pip` when the container is
+# built. Since the appengine application is the only app on the container we
+# care about, we won't bother with a virtualenv, instead installing the
+# packages system-wide.
+#
+# NOTE: These packages are only those required for testing or other
+# development purposes. Those libraries required at runtime *MUST* be
+# installed into the `app/third_party/py/` directory and committed to source
+# control.
+
+unittest2==0.5.1
