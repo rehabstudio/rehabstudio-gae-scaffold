@@ -15,12 +15,12 @@
 
 import os
 import time
-import unittest2
+import unittest
 
-import xsrf
+from app.base import xsrf
 
 
-class XsrfTest(unittest2.TestCase):
+class XsrfTest(unittest.TestCase):
   """Test cases for base.xsrf."""
 
   def setUp(self):
@@ -50,7 +50,3 @@ class XsrfTest(unittest2.TestCase):
     self.assertFalse(xsrf.ValidateToken(self.key, 'user', token))
     self.assertTrue(xsrf.ValidateToken(self.key, 'user', token, '*',
                                        xsrf.DEFAULT_TIMEOUT_ * 2))
-
-
-if __name__ == '__main__':
-  unittest2.main()

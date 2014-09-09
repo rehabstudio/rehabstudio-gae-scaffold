@@ -8,4 +8,6 @@
 # installed into the `app/third_party/py/` directory and committed to source
 # control.
 
-unittest2==0.5.1
+coverage==3.7.1
+nose==1.3.4
+yanc==0.2.4

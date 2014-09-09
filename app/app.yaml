@@ -23,7 +23,7 @@ handlers:
 # how URLs are routed in the webapp2 framework. Do not add additional handlers
 # directly here.
         - url: /.*
-          script: main.app
+          script: app.main.app
           secure: always
 
 libraries:

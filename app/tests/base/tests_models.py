@@ -13,14 +13,14 @@
 #     limitations under the License.
 """Tests for base.models."""
 
-import unittest2
+import unittest
 
-import models
+from app.base import models
 
 from google.appengine.ext import testbed
 
 
-class ModelsTest(unittest2.TestCase):
+class ModelsTest(unittest.TestCase):
   """Test cases for base.models."""
 
   def setUp(self):
@@ -32,7 +32,3 @@ class ModelsTest(unittest2.TestCase):
     config = models.GetApplicationConfiguration()
     self.assertIsNotNone(config)
     self.assertIsNotNone(config.xsrf_key)
-
-
-if __name__ == '__main__':
-  unittest2.main()

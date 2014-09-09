@@ -14,11 +14,11 @@
 """Tests for base.handlers."""
 
 import exceptions
-import unittest2
+import unittest
 import webapp2
 
-import handlers
-import xsrf
+from app.base import handlers
+from app.base import xsrf
 
 from google.appengine.ext import testbed
 
@@ -63,7 +63,7 @@ class DummyTaskHandler(handlers.BaseTaskHandler):
     self._RawWrite('get_succeeded')
 
 
-class HandlersTest(unittest2.TestCase):
+class HandlersTest(unittest.TestCase):
   """Test cases for base.handlers."""
 
   def setUp(self):
@@ -155,6 +155,3 @@ class HandlersTest(unittest2.TestCase):
     self.assertEqual('get_succeeded',
                      self.app.get_response('/task',
                                            headers=headers).body)
-
-if __name__ == '__main__':
-  unittest2.main()

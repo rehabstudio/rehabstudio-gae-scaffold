@@ -15,10 +15,10 @@
 
 import json
 import pickle
-import unittest2
+import unittest
 import yaml
 
-import api_fixer
+from app.base import api_fixer
 
 
 class BadPickle(object):
@@ -27,7 +27,7 @@ class BadPickle(object):
     return tuple([eval, tuple(['[1][2]'])])
 
 
-class ApiFixerTest(unittest2.TestCase):
+class ApiFixerTest(unittest.TestCase):
   """Test cases for base.api_fixer."""
 
   def testJsonEscaping(self):
@@ -60,7 +60,3 @@ class ApiFixerTest(unittest2.TestCase):
       self.assertEqual(foo['bar'][0], 1)
     except Exception:
       self.fail('safe unpickling failed')
-
-
-if __name__ == '__main__':
-  unittest2.main()

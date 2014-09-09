@@ -1,5 +1,6 @@
 out/
 node_modules/
+.coverage
 .DS_Store
 *.pyc
 *.swp
