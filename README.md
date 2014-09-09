@@ -1,25 +1,126 @@
-# Secure GAE Scaffold
+# rehabstudio-gae-scaffold
+
+![Docker](http://www.linux.com/news/galleries/image/docker?format=image&thumbnail=small)
+![Appengine](http://bkarak.wizhut.com/blog/wp-content/uploads/2012/01/app_engine-64.png)
+![Python](http://blog.magiksys.net/sites/default/files/pictures/python-logo-64.png)
+
+
+***
+
+**NOTE:** This scaffold is a fork of Google's [gae-secure-scaffold-python][gae-secure-scaffold-python] used under the terms of the Apache 2.0 license. Whilst we've tried to stay close to the original project, we've modified the layout extensively and made numerous updates (which are outlined in detail below).
+
 
 ## Introduction
-----
-Please note: this is not an official Google product.
+***
 
-This contains a boilerplate AppEngine application meant to provide a secure
-base on which to build additional functionality.  Structure:
+This scaffold aims to make it as easy as possible to get started with Gogle Appengine, providing a secure application template including example handlers,
+routes and tests. An example makefile is provided, containing sensible defaults
+for management commands (running the development server, tests, deploying,
+etc.).
 
-* / - top level directory for common files, e.g. app.yaml
-* /js - directory for uncompiled Javascript resources.
-* /src - directory for all source code
-* /static - directory for static content
-* /templates - directory for Jinja2 templates your app renders.
-* /templates/soy - directory for Closure Templates your application uses.
+This template uses [Docker][docker] to provide a standard development
+environment for all developers on a project, this is the preferred method of
+installation/development.
 
-Javascript resources for your application can be written using Closure,
-and compiled by Google's Closure Compiler (detailed below in the dependencies
-section).
+
+## Installing Docker
+***
+
+### Linux
+
+Docker is best supported on Linux, you can probably find packages for your
+preferred distribution [here][docker_install].
+
+Once installed, skip ahead to [Getting the scaffold](#getting-the-scaffold) below.
+
+### OSX
+
+Installing and configuring Docker on OSX isn't quite as straightforward as it
+is on Linux (yet). The [boot2docker][boot2docker] project provides a
+lightweight Linux VM that acts as a (mostly) transparent way to run docker on
+OSX.
+
+First, install Docker and boot2docker following the instructions on
+[this page][docker_osx_install]. Once you've installed Docker and launched
+`boot2docker` for the first time, you need to stop it again so we can make
+further modifications: `$ boot2docker stop`.
+
+Since Docker on OSX is technically running inside a virtual machine and not
+directly on the host OS, any volumes mounted will be on the VM's filesystem
+and any bound ports will be exposed only to the boot2docker VM. We can work
+around these limitations with a few tweaks to our setup.
+
+In order to mount folders from your host OS into the boot2docker VM you'll
+need to download a version of the boot2docker iso with Virtualbox's Guest
+Additions installed:
+
+    $ mkdir -p ~/.boot2docker
+    $ curl http://static.dockerfiles.io/boot2docker-v1.2.0-virtualbox-guest-additions-v4.3.14.iso -o ~/.boot2docker/boot2docker.iso
+
+Next, you need to tell Virtualbox to mount your `/Users` directory inside the
+VM:
+
+    $ VBoxManage sharedfolder add boot2docker-vm -name home -hostpath /Users
+
+And that should be it. Let’s verify:
+
+    $ boot2docker up
+    $ boot2docker ssh "ls /Users"
+
+You should see a list of all user's home folders from your host OS. Next, we
+need to forward the appropriate ports so that we can reach the running
+appengine development server directly from the host OS:
+
+    $ VBoxManage controlvm boot2docker-vm natpf1 "aesdk,tcp,127.0.0.1,8080,,8080"
+    $ VBoxManage controlvm boot2docker-vm natpf1 "aesdkadmin,tcp,127.0.0.1,8000,,8000"
+
+And you should be ready to go, just follow the rest of the setup guide.
+
+### Windows
+
+![Tumbleweed](http://media.giphy.com/media/5x89XRx3sBZFC/giphy.gif)
+
+No support yet (although it probably wouldn't take much). Pull requests very
+welcome.
+
+
+## Getting the scaffold
+***
+
+Whether you're running with Docker or have installed the Appengine SDK locally,
+the first thing you'll need to do is get the code. This part is easy with
+`git`:
+
+    $ git clone https://github.com/rehabstudio/rehabstudio-gae-scaffold.git
+
+Or without `git`:
+
+    $ wget https://github.com/rehabstudio/rehabstudio-gae-scaffold/archive/master.zip
+    $ unzip master.zip
+
+
+## Using the scaffold
+***
+
+The easiest way to use this scaffold is with [Docker][docker]. With Docker
+installed, running your application should be as simple as:
+
+    $ make run
+
+To run your application's tests, use the command:
+
+    $ make test
+
+Visit the running application [http://localhost:8080](http://localhost:8080)
+
+Check out the `Makefile` in the repository root for all available commands.
+
+
+## Security
+***
 
 The scaffold provides the following basic security guarantees by default through
-a set of base classes found in `src/base/handlers.py`.  These handlers:
+a set of base classes found in `app/base/handlers.py`.  These handlers:
 
 1. Set assorted security headers (Strict-Transport-Security, X-Frame-Options,
    X-XSS-Protection, X-Content-Type-Options, Content-Security-Policy) with
@@ -41,7 +142,7 @@ a set of base classes found in `src/base/handlers.py`.  These handlers:
    method for more information.
 
 In addition to the protections above, the scaffold monkey patches assorted APIs
-that use insecure or dangerous defaults (see `src/base/api_fixer.py`).
+that use insecure or dangerous defaults (see `app/base/api_fixer.py`).
 
 Obviously no framework is perfect, and the flexibility of Python offers many
 ways for a motivated developer to circumvent the protections offered.  Under
@@ -49,169 +150,32 @@ the assumption that developers are not malicious, using the scaffold should
 centralize many security mechanisms, provide safe defaults, and structure the
 code in a way that facilitates security review.
 
-Sample implementations can be found in `src/handlers.py`.  These demonstrate
+Sample implementations can be found in `app/handlers.py`.  These demonstrate
 basic functionality, and should be removed / replaced by code specific to
 your application.
 
 
-## Prerequisites
-----
-These instructions have been tested with the following software:
+### Installing Libraries
+***
 
-* node.js >= 0.8.0
-    * 0.8.0 is the minimum required to build with [Grunt](http://gruntjs.com/).
-* git
-* curl
+See the [Third party libraries][thrdprty] page for libraries that are already
+included in the SDK.  To include SDK libraries, add them in your `app.yaml`
+file. Other than libraries included in the SDK, only pure python libraries may
+be added to an App Engine project.
 
-An alternative to the Grunt build is provided via the `util.sh` shell script.
-
-## Dependency Setup
-----
-1.  `pushd .`
-1.  `mkdir $HOME/bin; cd $HOME/bin`
-1.  `npm install grunt-cli`
-    * Alternatively, `sudo npm install -g grunt-cli` will install system-wide
-      and you may skip the next step.
-1.  `export PATH=$HOME/bin/node_modules/grunt-cli/bin:$PATH`
-    * It is advisable to add this to login profile scripts (.bashrc, etc.).
-1.  Visit <https://developers.google.com/appengine/downloads>, copy URL of
-    "Linux/Other Platforms" zip file for current AppEngine SDK.  Do this
-    regardless of whether you are on Linux or OS X.
-1.  `curl -O <url on clipboard>`
-1.  `unzip google_appengine_*.zip`
-1.  `mkdir google_closure; mkdir google_closure; cd google_closure`
-1.  `curl -O https://dl.google.com/closure-compiler/compiler-latest.zip`
-1.  `unzip compiler-latest.zip; cd ..`
-1.  `mkdir google_closure_templates; cd google_closure_templates`
-1.  `curl -O https://dl.google.com/closure-templates/closure-templates-for-javascript-latest.zip`
-1.  `unzip closure-templates-for-javascript-latest.zip`
-1.  `popd`
-
-To install dependencies for unit testing:
-1. `sudo easy_install pip`
-1. `sudo pip install unittest2`
-
-## Scaffold Setup
-----
-These instructions assume a working directory of the repository root.
-
-### Dependencies
-
-All users should run:
-
-1. `git submodule init`
-1. `git submodule update`
-
-Grunt users should also run:
-
-`npm install`
-
-### Testing
-To run unit tests:
-
-`python run_tests.py ~/bin/google_appengine src`
-
-### Local Development
-To run the development appserver locally:
-
-1. `grunt clean`
-1. `grunt`
-1. `grunt appengine:run:app`
-
-Note that the development appserver will be running on a snapshot of code
-at the time you run it.  If you make changes, you can run the various Grunt
-tasks in order to propagate them to the local appserver.  For instance:
-
-`grunt copy` will refresh the source code (local and third party), static files,
-and templates.  You can run `grunt closureSoys` and/or `grunt closureBuilder`
-before `grunt copy` if you need to rebuild your Closure Templates or Closure
-Javascript.
-
-If you are not using Grunt, simply run:
-
-`util.sh -d`
-
-### Deployment
-To deploy to AppEngine:
-
-1. `grunt clean`
-1. `grunt --appid=<appid>`
-1. `grunt appengine:update:app --appid=<appid>`
-
-Specifying `--appid=` will override any value set in `config.json`.  You may
-modify the `config.json` file to avoid having to pass this parameter on
-every invocation.
-
-If you are not using Grunt, simply run:
-
-`util.sh -p <appid>`
-
-## Notes
-----
-Files in `js/` are compiled by the Closure Compiler (if available) and placed in
-`out/static/app.js`.
-
-Closure templates are compiled by the Closure Template Compiler (if available)
-and placed in `out/static/app.soy.js`.
-
-The `/static` and `/template` directories are replicated in `out/`, and the
-files in `src/` are rebased into `out/` (so `src/base/foo.py` becomes
-`out/base/foo.py`).
+Any third-party Python modules added to the `app/third_party/py/` directory will be
+added to Python's `sys.path` at runtime.
 
 
-## Detailed Dependency Information
--------------
-* The AppEngine SDK should be present in the directory:
+## Licensing
+***
 
-   `$HOME/bin/google_appengine/`
+See [LICENSE](LICENSE)
 
-You can find / download this at:
-<https://developers.google.com/appengine/downloads>
 
-* (Optional, if using Google Closure): The Google Closure Compiler (and a
-  suitable Java runtime), located at:
-
-  `$HOME/bin/google_closure/`
-
-You can find / download this at:
-  <https://github.com/google/closure-compiler>
-
-You will need all the files from this archive in the above directory:
-  compiler-latest.zip
-
-The compiler is invoked with the default namespace of 'app.'  The compiled
-Javascript is written to `out/static/app.js`.
-
-You will also need the Closure Library (in the closure-library submodule of
-this repository).
-
-You can find more on the Closure Library here:
-  <https://github.com/google/closure-library>
-
-To use it, you will need to check out the code as a submodule by running the
-following commands from the base directory of this repository:
-
-  `git submodule add <https://github.com/google/closure-library/> closure-library`
-
-  `git commit -m "Initial import of Closure Library"`
-
-* (Optional, if using Closure Templates): The Closure Template compiler (in
-  addition to the Closure Compiler), located at:
-
-   `$HOME/bin/google_closure_templates`
-
-You can find / download Closure Templates at:
-  <https://github.com/google/closure-templates>
-
-You will need all the files from this archive in the above directory:
-  closure-templates-for-javascript-latest.zip
-
-You can build this using the ant target "zips-for-release", or download a
-prebuilt version (the URL is in the Dependency Setup section).
-
-The deployment script checks for the presence of .soy files in templates/soy.
-If found, they are compiled to a single Javascript file using the
-SoyToJsSrcCompiler.jar in the previously mentioned directory.  The resulting
-Javascript file is stored in static/app.soy.js, alongside the `soyutils.js`
-library provided with the Closure Templates bundle that is necessary to include
-on any page you plan to use Closure Templates.
+[boot2docker]: http://boot2docker.io/  "boot2docker"
+[docker]: https://docker.io  "Docker"
+[docker_install]: https://docs.docker.com/installation/  "Docker Installation"
+[docker_osx_install]: https://docs.docker.com/installation/mac/  "Docker"
+[gae-secure-scaffold-python]: https://github.com/google/gae-secure-scaffold-python
+[thrdprty]: https://developers.google.com/appengine/docs/python/tools/libraries27  "Appengine third-party libraries"
