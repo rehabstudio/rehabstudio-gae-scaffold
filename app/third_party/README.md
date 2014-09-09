@@ -1,7 +1,7 @@
 Use the `py` and `js` directories to track third party Python/Javascript code
-used in building, deploying, or serving the site / application.  The contents
-will be copied during the build process to `out/` and `out/static/third_party`
-respectively.
+used in building, deploying, or serving the site / application.  The js
+contents will be copied during the build process to `out/static/third_party`
+whilst the python contents will be added to `sys.path` at runtime.
 
 Check in a pristine copy
 ========================
@@ -52,19 +52,9 @@ The structure is:
                   # http://example.org/packagename-0.3.tar.gz
                   # https://github.com/<user>/<project>/archive/<ref>.zip
                   # https://bitbucket.org/<user>/<project>/get/<ref>.zip
-                  #
-https://<host>.googlesource.com/<project>/+archive/<ref>.tar.gz
-                  # http://<project>.googlecode.com/archive/<hash>.zip (only for
-git or hg projects)
                   # http://<repo>.<project>.googlecode.com/archive/<hash>.zip
                   # http://<project>.googlecode.com/svn-history/<rNNN>/trunk
-                  # https://svn.code.sf.net/p/<project>/code/trunk/?p=<revision>
-(you can also use the tag path if using a tagged release)
-    Version: XXX  # e.g., version string of the package, such as: 0.3
-                  # rNNN for svn revision NNN; tag for git; the entire hash for
-git, hg
-                  # YYYY-MM-DD of date downloaded if *no other* version is
-available
+
     License: XXX  # e.g., GPL v2, GPL v3, LGPL v2.1, Apache 2.0, BSD, MIT, etc.
     License File: # should be LICENSE (see the above instructions)
 
