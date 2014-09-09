@@ -21,6 +21,13 @@ help:
 build:
 	docker build -t="appengine/$(PROJNAME)" .
 
+dirtycheck:
+	@python ./ops/scripts/dirtycheck.py . --quiet || (echo "Git repository is dirty: Please review and try again."; exit 1)
+	@echo "Git repository is clean: Continuing."
+
+deploy: dirtycheck storage
+	docker run -t -i --volumes-from $(PROJNAME) -v $(CURDIR)/app:/app appengine/$(PROJNAME) make -C /app deploy
+
 storage: build
 	-docker run -t -i --name $(PROJNAME) appengine/$(PROJNAME) echo "Storage-only container."
 

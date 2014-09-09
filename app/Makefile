@@ -9,6 +9,10 @@ clean:
 	find . -name '*~' -exec rm -f {} +
 	find . -empty -type d -delete
 
+deploy: clean
+	# deploy application to the default environment
+	appcfg.py update . --oauth2 --oauth2_credential_file=~/.appengine_storage/.appcfg_oauth2 --noauth_local_webserver
+
 run: clean
 	# run the appengine development server
 	dev_appserver.py .                            \
