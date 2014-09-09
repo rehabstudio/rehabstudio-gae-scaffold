@@ -1,6 +1,6 @@
 # The name of the project is used throughout the makefile to provide
 # project-specific docker containers.
-PROJNAME = gae-secure-scaffold
+PROJNAME = rehabstudio-gae-scaffold
 
 # If running on Linux (and thus using docker directly) we set the user id to
 # that of the current user. If running on Mac (and thus on top of boot2docker)
