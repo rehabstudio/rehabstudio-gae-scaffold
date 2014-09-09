@@ -19,34 +19,11 @@ import webapp2
 
 import base
 import base.constants
-import handlers
+
+# local imports
+from . import routes
 
 
-# These should all inherit from base.handlers.BaseHandler
-_UNAUTHENTICATED_ROUTES = [('/', handlers.RootHandler),
-                           ('/xss', handlers.XssHandler),
-                           ('/xssi', handlers.XssiHandler)]
-
-# These should all inherit from base.handlers.BaseAjaxHandler
-_UNAUTHENTICATED_AJAX_ROUTES = [('/csp', handlers.CspHandler)]
-
-# These should all inherit from base.handlers.AuthenticatedHandler
-_USER_ROUTES = [('/xsrf', handlers.XsrfHandler)]
-
-# These should all inherit from base.handlers.AuthenticatedAjaxHandler
-_AJAX_ROUTES = []
-
-# These should all inherit from base.handlers.AdminHandler
-_ADMIN_ROUTES = []
-
-# These should all inherit from base.handlers.AdminAjaxHandler
-_ADMIN_AJAX_ROUTES = []
-
-# These should all inherit from base.handlers.BaseCronHandler
-_CRON_ROUTES = []
-
-# These should all inherit from base.handlers.BaseTaskHandler
-_TASK_ROUTES = []
 
 # Place global application configuration settings (e.g. settings for
 # 'webapp2_extras.sessions') here.
@@ -115,8 +92,6 @@ _CONFIG = {
 #################################
 
 app = webapp2.WSGIApplication(
-    routes=(_UNAUTHENTICATED_ROUTES + _UNAUTHENTICATED_AJAX_ROUTES +
-            _USER_ROUTES + _AJAX_ROUTES + _ADMIN_ROUTES + _ADMIN_AJAX_ROUTES +
-            _CRON_ROUTES + _TASK_ROUTES),
+    routes=(routes.ROUTES),
     debug=base.constants.DEBUG,
     config=_CONFIG)
