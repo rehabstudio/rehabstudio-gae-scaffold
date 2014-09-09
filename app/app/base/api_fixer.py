@@ -92,28 +92,34 @@ ReplaceDefaultArgument(json.dumps, 'cls', _JsonEncoderForHtml)
 
 # Pickle.  See http://www.cs.jhu.edu/~s/musings/pickle.html for more info.
 # Whitelist of module name => (module, [list of safe names])
-_PICKLE_CLASS_WHITELIST = { '__builtin__': (__builtin__,
-                                            ['basestring',
-                                             'bool',
-                                             'buffer',
-                                             'bytearray',
-                                             'bytes',
-                                             'complex',
-                                             'dict',
-                                             'enumerate',
-                                             'float',
-                                             'frozenset',
-                                             'int',
-                                             'list',
-                                             'long',
-                                             'reversed',
-                                             'set',
-                                             'slice',
-                                             'str',
-                                             'tuple',
-                                             'unicode',
-                                             'xrange']),
-                           }
+_PICKLE_CLASS_WHITELIST = {
+    '__builtin__': (
+        __builtin__,
+        [
+            'basestring',
+            'bool',
+            'buffer',
+            'bytearray',
+            'bytes',
+            'complex',
+            'dict',
+            'enumerate',
+            'float',
+            'frozenset',
+            'int',
+            'list',
+            'long',
+            'reversed',
+            'set',
+            'slice',
+            'str',
+            'tuple',
+            'unicode',
+            'xrange',
+        ],
+    ),
+}
+
 
 # See https://docs.python.org/3/library/pickle.html#restricting-globals.
 class RestrictedUnpickler(pickle.Unpickler):
@@ -124,8 +130,10 @@ class RestrictedUnpickler(pickle.Unpickler):
       return getattr(module, name)
     raise ApiSecurityException('%s.%s forbidden in unpickling' % (module, name))
 
+
 def _SafePickleLoad(f):
   return RestrictedUnpickler(f).load()
+
 
 def _SafePickleLoads(string):
   return RestrictedUnpickler(io.BytesIO(string)).load()

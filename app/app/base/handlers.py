@@ -61,7 +61,7 @@ def xsrf_protected(f):
   def wrapper(self, *args, **kwargs):
     non_xsrf_protected_verbs = ['options', 'head', 'get']
     if (self.request.method.lower() in non_xsrf_protected_verbs or
-        self._RequestContainsValidXsrfToken()):
+      self._RequestContainsValidXsrfToken()):
       return f(self, *args, **kwargs)
     else:
       self.XsrfFail()
@@ -322,8 +322,8 @@ class AuthenticatedHandler(BaseHandler):
     # By default, Angular's $http service will add quotes around the
     # X-XSRF-TOKEN.
     if (token and
-        self.app.config.get('using_angular', constants.DEFAULT_ANGULAR) and
-        token[0] == '"' and token[-1] == '"'):
+      self.app.config.get('using_angular', constants.DEFAULT_ANGULAR) and
+      token[0] == '"' and token[-1] == '"'):
       token = token[1:-1]
 
     if xsrf.ValidateToken(_GetXsrfKey(), self.current_user.email(),
@@ -366,8 +366,8 @@ class AuthenticatedAjaxHandler(BaseAjaxHandler):
     # By default, Angular's $http service will add quotes around the
     # X-XSRF-TOKEN.
     if (token and
-        self.app.config.get('using_angular', constants.DEFAULT_ANGULAR) and
-        token[0] == '"' and token[-1] == '"'):
+      self.app.config.get('using_angular', constants.DEFAULT_ANGULAR) and
+      token[0] == '"' and token[-1] == '"'):
       token = token[1:-1]
 
     if xsrf.ValidateToken(_GetXsrfKey(), self.current_user.email(),
