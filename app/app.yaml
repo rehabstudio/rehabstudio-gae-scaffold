@@ -2,7 +2,7 @@
 # DO NOT MODIFY THIS FILE WITHOUT UNDERSTANDING THE SECURITY IMPLICATIONS #
 ###########################################################################
 
-application: rehabstudio-gae-scaffold
+application: gae-scaffold
 version: development
 runtime: python27
 api_version: 1
