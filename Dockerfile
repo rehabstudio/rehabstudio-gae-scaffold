@@ -31,10 +31,6 @@ RUN wget -nv https://deb.nodesource.com/gpgkey/nodesource.gpg.key && \
     apt-key add nodesource.gpg.key && rm nodesource.gpg.key && \
     apt-get update && apt-get install -y nodejs && npm install -g grunt-cli
 
-# copy the grunt run script into place and give it the right permissions
-ADD ops/run_grunt.sh /usr/local/bin/run_grunt.sh
-RUN chmod a+x /usr/local/bin/run_grunt.sh
-
 # default run command
 CMD bash
 

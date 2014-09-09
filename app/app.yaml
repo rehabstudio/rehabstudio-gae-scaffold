@@ -2,17 +2,8 @@
 # DO NOT MODIFY THIS FILE WITHOUT UNDERSTANDING THE SECURITY IMPLICATIONS #
 ###########################################################################
 
-# The "application" parameter is automatically set based on the below rules:
-# For util.sh: the argument to '-p' is used
-# For Grunt users: the 'appid' value in config.json.  It may also be
-#                  overriden by passing an '--appid=' parameter to grunt
-# You do not need to modify it here.
-application: __APPLICATION__
-
-# The version is automatically generated based on the current git hash.
-# If there are uncommitted changes, a '-dev' suffix will be added. You do
-# not need to modify it here.
-version: __VERSION__
+application: gae-secure-scaffold
+version: development
 runtime: python27
 api_version: 1
 threadsafe: true
@@ -27,7 +18,7 @@ handlers:
             X-Content-Type-Options: "nosniff"
             X-XSS-Protection: "1; mode=block"
 
-# All URLs should be mapped via the *_ROUTES variables in the src/main.py file.
+# All URLs should be mapped via the *_ROUTES variables in the app/routes.py file.
 # See https://webapp-improved.appspot.com/guide/routing.html for information on
 # how URLs are routed in the webapp2 framework. Do not add additional handlers
 # directly here.
