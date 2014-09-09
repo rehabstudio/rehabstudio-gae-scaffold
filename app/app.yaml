@@ -8,44 +8,45 @@ runtime: python27
 api_version: 1
 threadsafe: true
 
+# warmup requests are commonly enabled to help ensure applications begin
+# serving data as quickly as possible without hitting cold caches etc.
+inbound_services:
+  - warmup
+
 handlers:
-        - url: /static/
-          static_dir: static/
-          secure: always
-          http_headers:
-            X-Frame-Options: "DENY"
-            Strict-Transport-Security: "max-age=2592000; includeSubdomains"
-            X-Content-Type-Options: "nosniff"
-            X-XSS-Protection: "1; mode=block"
+  - url: /static/
+    static_dir: static/
+    secure: always
+    http_headers:
+      X-Frame-Options: "DENY"
+      Strict-Transport-Security: "max-age=2592000; includeSubdomains"
+      X-Content-Type-Options: "nosniff"
+      X-XSS-Protection: "1; mode=block"
 
 # All URLs should be mapped via the *_ROUTES variables in the app/routes.py file.
 # See https://webapp-improved.appspot.com/guide/routing.html for information on
 # how URLs are routed in the webapp2 framework. Do not add additional handlers
 # directly here.
-        - url: /.*
-          script: app.main.app
-          secure: always
+
+  - url: /.*
+    script: app.wsgi.app
+    secure: always
 
 libraries:
-        - name: django
-          version: latest
+  - name: django
+    version: latest
 
-        - name: jinja2
-          version: latest
+  - name: jinja2
+    version: latest
 
-        - name: webapp2
-          version: latest
+  - name: webapp2
+    version: latest
 
 skip_files:
-         - ^(.*/)?#.*#$
-         - ^(.*/)?.*~$
-         - ^(.*/)?.*\.py[co]$
-         - ^(.*/)?.*/RCS/.*$
-         - ^(.*/)?\..*$
-         - app.yaml.base
-         - README
-         - util.sh
-         - run_tests.py
-         - .*_test.py
-         - js/.*
-         - closure-library/.*
+  - ^(.*/)?#.*#$
+  - ^(.*/)?.*~$
+  - ^(.*/)?.*\.py[co]$
+  - ^(.*/)?.*/RCS/.*$
+  - ^(.*/)?\..*$
+  - app.yaml
+  - tests/.*
