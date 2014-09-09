@@ -180,11 +180,15 @@ installed, running your application should be as simple as:
 
     $ make run
 
+Then visit the running application [http://localhost:8080](http://localhost:8080)
+
 To run your application's tests, use the command:
 
     $ make test
 
-Visit the running application [http://localhost:8080](http://localhost:8080)
+To deploy your application to appengine, use:
+
+    $ make deploy
 
 Check out the `Makefile` in the repository root for all available commands.
 
