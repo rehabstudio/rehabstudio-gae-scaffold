@@ -31,4 +31,4 @@ shell: storage
 	docker run -t -i --volumes-from $(PROJNAME) -v $(CURDIR)/app:/app -p 0.0.0.0:8080:8080 -p 0.0.0.0:8000:8000 appengine/$(PROJNAME) bash
 
 test: build
-	docker run -t -i -v $(CURDIR)/app:/app -p 0.0.0.0:8080:8080 -p 0.0.0.0:8000:8000 $(USER_ID) appengine/$(PROJNAME) python /app/run_tests.py /google_appengine /app/app
+	docker run -t -i -v $(CURDIR)/app:/app -p 0.0.0.0:8080:8080 -p 0.0.0.0:8000:8000 $(USER_ID) appengine/$(PROJNAME) python /app/run_tests.py /opt/google_appengine /app/app
