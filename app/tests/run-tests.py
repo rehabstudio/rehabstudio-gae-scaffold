@@ -57,7 +57,15 @@ if __name__ == '__main__':
     res = nose.run(argv=[
         'run-tests.py',
         '-v',
+        '--with-coverage',
+        '--cover-erase',
+        '--cover-package=app',
+        '--cover-xml',
+        '--cover-xml-file=/output/coverage.xml',
+        '--with-xunit',
+        '--xunit-file=/output/nosetests.xml',
         '--with-yanc',
         '--logging-level=INFO'
     ])
+    os.remove('/app/.coverage')
     sys.exit(int(not res))

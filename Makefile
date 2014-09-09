@@ -38,4 +38,4 @@ shell: storage
 	docker run -t -i --volumes-from $(PROJNAME) -v $(CURDIR)/app:/app -p 0.0.0.0:8080:8080 -p 0.0.0.0:8000:8000 appengine/$(PROJNAME) bash
 
 test: build
-	docker run -t -i -v $(CURDIR)/app:/app -p 0.0.0.0:8080:8080 -p 0.0.0.0:8000:8000 $(USER_ID) appengine/$(PROJNAME) make -C /app test
+	docker run -t -i -v $(CURDIR)/app:/app -v $(CURDIR)/output:/output $(USER_ID) appengine/$(PROJNAME) make -C /app test

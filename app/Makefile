@@ -23,6 +23,4 @@ run: clean
 		--skip_sdk_update_check
 
 test: clean
-	coverage erase
-	coverage run --source="app" tests/run-tests.py
-	coverage report -m
+	@python tests/run-tests.py
