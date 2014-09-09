@@ -1,0 +1,4 @@
+*.py[co]
+app/.coverage
+output/coverage.xml
+output/nosetests.xml
