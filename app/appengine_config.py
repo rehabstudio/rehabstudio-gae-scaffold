@@ -1,4 +1,6 @@
-"""`appengine_config` gets loaded when starting a new application instance."""
+"""`appengine_config` gets loaded when starting a new application instance.
+"""
+# stdlib imports
 import sys
 import os.path
 

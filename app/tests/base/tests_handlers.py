@@ -11,16 +11,19 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
-"""Tests for base.handlers."""
-
+"""Tests for base.handlers.
+"""
+# stdlib imports
 import exceptions
 import unittest
 import webapp2
 
+# third-party imports
+from google.appengine.ext import testbed
+
+# local imports
 from app.base import handlers
 from app.base import xsrf
-
-from google.appengine.ext import testbed
 
 
 class DummyHandler(handlers.AuthenticatedHandler):

@@ -11,12 +11,14 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
-"""Tests for base.xsrf."""
-
+"""Tests for base.xsrf.
+"""
+# stdlib imports
 import os
 import time
 import unittest
 
+# local imports
 from app.base import xsrf
 
 

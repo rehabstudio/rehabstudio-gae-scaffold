@@ -11,11 +11,13 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
-"""Utilities related to Cross-Site Request Forgery protection."""
-
+"""Utilities related to Cross-Site Request Forgery protection.
+"""
+# stdlib imports
 import hashlib
 import hmac
 import time
+
 
 DELIMITER_ = ':'
 DEFAULT_TIMEOUT_ = 86400

@@ -11,14 +11,20 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
+"""HTTP request handlers for the application.
+"""
+# stdlib imports
 import json
 import logging
 
+# third-party imports
 from google.appengine.api import memcache  # For XsrfHandler.  Remove if unused.
 from google.appengine.api import users
 
-from base import constants
-from base import handlers
+# local imports
+from .base import constants
+from .base import handlers
+
 
 # Example handlers to demonstrate functionality.
 # Replace with your own implementations.

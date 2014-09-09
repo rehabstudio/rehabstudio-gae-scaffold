@@ -11,11 +11,14 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
-"""Framework wide datastore models."""
+"""Framework wide datastore models.
+"""
+# stdlib imports
+import os
 
+# third-party imports
 from google.appengine.ext import ndb
 
-import os
 
 @ndb.transactional
 def GetApplicationConfiguration():

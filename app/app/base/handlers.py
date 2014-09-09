@@ -11,21 +11,24 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
-"""A collection of secure base handlers for webapp2-based applications."""
-
+"""A collection of secure base handlers for webapp2-based applications.
+"""
+# stdlib imports
 import abc
 import functools
 import jinja2
 import json
 import webapp2
 
-import api_fixer
-import constants
-import models
-import xsrf
-
+# third-party imports
 from google.appengine.api import memcache
 from google.appengine.api import users
+
+# local imports
+from . import api_fixer
+from . import constants
+from . import models
+from . import xsrf
 
 
 # Assorted decorators that can be used inside a webapp2.RequestHandler object

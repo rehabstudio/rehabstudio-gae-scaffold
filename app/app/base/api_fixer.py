@@ -11,8 +11,9 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
-"""Fixes up various popular APIs to ensure they use secure defaults."""
-
+"""Fixes up various popular APIs to ensure they use secure defaults.
+"""
+# stdlib imports
 import __builtin__
 import constants
 import cPickle
@@ -23,6 +24,7 @@ import logging
 import pickle
 import yaml
 
+# third-party imports
 from google.appengine.api import urlfetch
 from webapp2_extras import sessions
 

@@ -11,13 +11,16 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
-"""Tests for base.models."""
-
+"""Tests for base.models.
+"""
+# stdlib imports
 import unittest
 
-from app.base import models
-
+# third-party imports
 from google.appengine.ext import testbed
+
+# local imports
+from app.base import models
 
 
 class ModelsTest(unittest.TestCase):

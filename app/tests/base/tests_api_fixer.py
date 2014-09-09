@@ -11,13 +11,15 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
-"""Tests for base.api_fixer."""
-
+"""Tests for base.api_fixer.
+"""
+# stdlib imports
 import json
 import pickle
 import unittest
 import yaml
 
+# local imports
 from app.base import api_fixer
 
 
