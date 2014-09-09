@@ -11,7 +11,7 @@ base on which to build additional functionality.  Structure:
 * /js - directory for uncompiled Javascript resources.
 * /src - directory for all source code
 * /static - directory for static content
-* /templates - directory for Django/Jinja2 templates your app renders.
+* /templates - directory for Jinja2 templates your app renders.
 * /templates/soy - directory for Closure Templates your application uses.
 
 Javascript resources for your application can be written using Closure,
@@ -27,7 +27,7 @@ a set of base classes found in `src/base/handlers.py`.  These handlers:
    and Cross-Site Script Inclusion.  See  `_SetCommonResponseHeaders()` and
    `SetAjaxResponseHeaders()`.
 1. Prevent the XSS-prone construction of HTML via string concatenation by
-   forcing the use of a template system (Django/Jinja2 supported).  The
+   forcing the use of a template system (Jinja2 supported).  The
    template systems have non-contextual autoescaping enabled by default.
    See the `render()`, `render_json()` methods in `BaseHandler` and
    `BaseAjaxHandler`. For contextual autoescaping, you should use Closure

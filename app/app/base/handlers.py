@@ -14,9 +14,6 @@
 """A collection of secure base handlers for webapp2-based applications."""
 
 import abc
-import django.conf
-import django.template
-import django.template.loader
 import functools
 import jinja2
 import json
@@ -29,12 +26,6 @@ import xsrf
 
 from google.appengine.api import memcache
 from google.appengine.api import users
-
-
-# Django initialization.
-django.conf.settings.configure(DEBUG=constants.DEBUG,
-                               TEMPLATE_DEBUG=constants.DEBUG,
-                               TEMPLATE_DIRS=[constants.TEMPLATE_DIR])
 
 
 # Assorted decorators that can be used inside a webapp2.RequestHandler object
@@ -233,11 +224,7 @@ class BaseHandler(webapp2.RequestHandler):
       template_values = {}
 
     template_values['_xsrf'] = self._xsrf_token
-    if self.app.config.get('template', constants.JINJA2) is constants.JINJA2:
-      t = self.jinja2.get_template(template_name)
-    else:
-      t = django.template.loader.get_template(template_name)
-      template_values = django.template.Context(template_values)
+    t = self.jinja2.get_template(template_name)
     return t.render(template_values)
 
   def render(self, template_name, template_values=None):

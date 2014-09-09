@@ -55,7 +55,7 @@ var foo = '' + alert(1) + '';
 <p>The Javascript interpreter will execute the alert expression to build the
 string, and we have a cross-site scripting vulnerability.  To avoid these,
 we recommend avoiding constructs like this in your code.  If you must have
-this construct, then template systems like Jinja2 and Django often provide
+this construct, then template systems like Jinja2 often provide
 a specific Javascript escaping function, but this is quite error prone.
 If you are looking for a truly better way, you should investigate using a
 <em>contextually aware</em> autoescaping template system, such as

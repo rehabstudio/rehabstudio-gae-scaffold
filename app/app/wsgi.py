@@ -55,16 +55,15 @@ _TASK_ROUTES = []
 # self.app.config.get('foo')
 #
 # Framework level settings:
-#   template: one of base.constants.JINJA2 (default) or base.constants.DJANGO.
 #
-#   using_angular: True or False (default).  When True, an XSRF-TOKEN cookie
-#                  will be set for interception/use by Angular's $http service.
-#                  When False, no header will be set (but an XSRF token will
-#                  still be available under the _xsrf key for Django/Jinja
-#                  templates).  If you set this to True, be especially careful
-#                  when mixing Angular and Django/Jinja2 templates:
-#                    https://github.com/angular/angular.js/issues/5601
-#                  See the summary by IgorMinar for details.
+#   using_angular:  True or False (default).  When True, an XSRF-TOKEN cookie
+#                   will be set for interception/use by Angular's $http service.
+#                   When False, no header will be set (but an XSRF token will
+#                   still be available under the _xsrf key for Jinja templates).
+#                   If you set this to True, be especially careful
+#                   when mixing Angular and Jinja2 templates:
+#                   https://github.com/angular/angular.js/issues/5601. See the
+#                   summary by IgorMinar for details.
 #
 #   framing_policy: one of base.constants.DENY (default),
 #                   base.constants.SAMEORIGIN, or base.constants.PERMIT

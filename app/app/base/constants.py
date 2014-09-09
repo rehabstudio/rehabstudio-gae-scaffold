@@ -20,8 +20,6 @@ def _IsDevAppServer():
   return os.environ.get('SERVER_SOFTWARE', '').startswith('Development')
 
 # webapp2 application configuration constants.
-# template
-(DJANGO, JINJA2) = range(0, 2)
 
 # using_angular
 DEFAULT_ANGULAR = False
