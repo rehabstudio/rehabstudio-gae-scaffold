@@ -94,6 +94,8 @@ matures.
 - Routes can get messy, so now live in their own `routes.py` module for easier
   maintenance.
 - PEP8 everywhere (sort of).
+- Patched Appengine SDK to allow connections to a local remote_api server
+  using a host other than localhost.
 
 
 ## Installing Docker
@@ -189,6 +191,18 @@ To run your application's tests, use the command:
 To deploy your application to appengine, use:
 
     $ make deploy
+
+To open a bash shell inside the container environment, use:
+
+    $ make shell
+
+To run an IPython shell inside an appengine environment (with both your app
+and all SDK modules importable), use:
+
+    $ make pyshell
+
+**Note:** When you want to run the python shell you must have already started
+`make run` in another shell so we can access the remote API.
 
 Check out the `Makefile` in the repository root for all available commands.
 

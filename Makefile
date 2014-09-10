@@ -33,7 +33,7 @@ dirtycheck:
 deploy: dirtycheck storage
 	docker run -t -i --volumes-from $(STRGCNTNR) -v $(CURDIR)/app:/app $(IMGNM) make -C /app deploy
 
-ipython: storage
+pyshell: storage
 	docker run -t -i --rm --volumes-from $(STRGCNTNR) -v $(CURDIR)/app:/app $(IMGNM) remote_shell.py
 
 storage: build

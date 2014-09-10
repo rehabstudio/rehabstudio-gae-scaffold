@@ -57,65 +57,47 @@ setup_environ()
 # import the os compatibility shim
 from google.appengine.tools import os_compat
 
-# stdlib imports
-import atexit
-
-try:
-  import readline
-except ImportError:
-  readline = None
-
 # third-party imports
 import IPython
 from google.appengine.ext.remote_api import remote_api_stub
 from google.appengine.tools import appengine_rpc
 
 
-HISTORY_PATH = os.path.expanduser('~/.remote_api_shell_history')
 BANNER = """App Engine remote_api shell
 All SDK and application modules should be on the path and importable.\
 """
 
 
 def auth_func():
-  return ('xxx@xxx', 'xxx')
+    return ('xxx@xxx', 'xxx')
 
 
 def remote_api_shell(servername, appid, path, secure, rpc_server_factory):
-  """Actually run the remote_api_shell."""
+    """Actually run the remote_api_shell.
+    """
 
-  remote_api_stub.ConfigureRemoteApi(appid, path, auth_func,
-                                     servername=servername,
-                                     save_cookies=True, secure=secure,
-                                     rpc_server_factory=rpc_server_factory)
-  remote_api_stub.MaybeInvokeAuthentication()
+    remote_api_stub.ConfigureRemoteApi(appid, path, auth_func,
+                                       servername=servername,
+                                       save_cookies=True, secure=secure,
+                                       rpc_server_factory=rpc_server_factory)
+    remote_api_stub.MaybeInvokeAuthentication()
 
-  os.environ['SERVER_SOFTWARE'] = 'Development (remote_api_shell)/1.0'
+    os.environ['SERVER_SOFTWARE'] = 'Development (remote_api_shell)/1.0'
 
-  if not appid:
-
-    appid = os.environ['APPLICATION_ID']
-  sys.ps1 = '%s> ' % appid
-  if readline is not None:
-
-    readline.parse_and_bind('tab: complete')
-    atexit.register(lambda: readline.write_history_file(HISTORY_PATH))
-    if os.path.exists(HISTORY_PATH):
-      readline.read_history_file(HISTORY_PATH)
-
-  sys.path.insert(0, '/app')
-
-  IPython.embed(header=BANNER)
+    # ensure our app is on the python path
+    sys.path.insert(0, '/app')
+    # run an embedded IPython shell in the current context
+    IPython.embed(header=BANNER)
 
 
 def main():
-  """run python shell.
-  """
-
-  with open('/etc/host_ip', 'r') as f:
-    servername = f.read().strip() + ':8080'
-
-  remote_api_shell(servername, 'dev~gae-scaffold', '/_ah/remote_api', False, appengine_rpc.HttpRpcServer)
+    """run python shell.
+    """
+    # read host IP address from file created at container build time
+    with open('/etc/host_ip', 'r') as f:
+        servername = f.read().strip() + ':8080'
+    # launch the shell
+    remote_api_shell(servername, 'dev~gae-scaffold', '/_ah/remote_api', False, appengine_rpc.HttpRpcServer)
 
 
 if __name__ == '__main__':
