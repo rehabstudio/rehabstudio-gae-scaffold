@@ -8,6 +8,11 @@ runtime: python27
 api_version: 1
 threadsafe: true
 
+# enable the remote api so we can launch a python shell to interact with our
+# application, whether locally or remote
+builtins:
+- remote_api: on
+
 # warmup requests are commonly enabled to help ensure applications begin
 # serving data as quickly as possible without hitting cold caches etc.
 inbound_services:

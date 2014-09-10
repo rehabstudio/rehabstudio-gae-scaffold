@@ -3,6 +3,7 @@
 CID = $(shell python ops/scripts/cidgen.py)
 IMGNM = gae_scaffold/$(CID)
 STRGCNTNR = $(CID)-storage
+RNCNTNR = $(CID)-run
 
 # If running on Linux (and thus using docker directly) we set the user id to
 # that of the current user. If running on Mac (and thus on top of boot2docker)
@@ -32,14 +33,19 @@ dirtycheck:
 deploy: dirtycheck storage
 	docker run -t -i --volumes-from $(STRGCNTNR) -v $(CURDIR)/app:/app $(IMGNM) make -C /app deploy
 
+ipython: storage
+	docker run -t -i --rm --volumes-from $(STRGCNTNR) -v $(CURDIR)/app:/app $(IMGNM) remote_shell.py
+
 storage: build
 	-docker run -t -i --name $(STRGCNTNR) $(IMGNM) echo "Storage-only container."
 
 run: storage
-	docker run -t -i --volumes-from $(STRGCNTNR) -v $(CURDIR)/app:/app -p 0.0.0.0:8080:8080 -p 0.0.0.0:8000:8000 $(IMGNM) make -C /app run
+	@-docker kill $(RNCNTNR)
+	@-docker rm $(RNCNTNR)
+	docker run -t -i --rm --name $(RNCNTNR) --volumes-from $(STRGCNTNR) -v $(CURDIR)/app:/app -p 0.0.0.0:8080:8080 -p 0.0.0.0:8000:8000 $(IMGNM) make -C /app run
 
 shell: storage
-	docker run -t -i --volumes-from $(STRGCNTNR) -v $(CURDIR)/app:/app -p 0.0.0.0:8080:8080 -p 0.0.0.0:8000:8000 $(IMGNM) bash
+	docker run -t -i --volumes-from $(STRGCNTNR) -v $(CURDIR)/app:/app -v $(CURDIR)/output:/output $(IMGNM) bash
 
 test: build
 	docker run -t -i -v $(CURDIR)/app:/app -v $(CURDIR)/output:/output $(USER_ID) $(IMGNM) make -C /app test

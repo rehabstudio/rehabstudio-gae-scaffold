@@ -32,6 +32,16 @@ RUN cd /opt/ && wget -nv https://storage.googleapis.com/appengine-sdks/featured/
 RUN cd /opt/ && unzip -q google_appengine_1.9.10.zip && rm google_appengine_1.9.10.zip
 ENV PATH /opt/google_appengine:$PATH
 
+# patch the SDK so we can bind the remote API server to something other than localhost
+ADD ops/sdk_patches/appengine_rpc.py /opt/google_appengine/google/appengine/tools/appengine_rpc.py
+
+# Add the remote_shell.py script to the $PATH and make it executable
+ADD ops/scripts/remote_shell.py /usr/local/bin/remote_shell.py
+RUN chmod a+x /usr/local/bin/remote_shell.py
+
+# get the ip address of the host as exposed inside the container
+RUN /sbin/ip route|awk '/default/ { print $3 }' > /etc/host_ip
+
 # use a volume to persist application data across container restarts
 VOLUME ["/.appengine_storage"]
 
