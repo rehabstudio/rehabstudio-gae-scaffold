@@ -59,7 +59,6 @@ from google.appengine.tools import os_compat
 
 # stdlib imports
 import atexit
-import code
 
 try:
   import readline
@@ -67,21 +66,15 @@ except ImportError:
   readline = None
 
 # third-party imports
-from google.appengine.api import memcache
-from google.appengine.api import urlfetch
-from google.appengine.api import users
-from google.appengine.ext import db
-from google.appengine.ext import ndb
+import IPython
 from google.appengine.ext.remote_api import remote_api_stub
 from google.appengine.tools import appengine_rpc
 
 
 HISTORY_PATH = os.path.expanduser('~/.remote_api_shell_history')
-DEFAULT_PATH = '/_ah/remote_api'
 BANNER = """App Engine remote_api shell
-Python %s
-The db, ndb, users, urlfetch, and memcache modules are imported.\
-""" % sys.version
+All SDK and application modules should be on the path and importable.\
+"""
 
 
 def auth_func():
@@ -110,18 +103,9 @@ def remote_api_shell(servername, appid, path, secure, rpc_server_factory):
     if os.path.exists(HISTORY_PATH):
       readline.read_history_file(HISTORY_PATH)
 
-  if '' not in sys.path:
-    sys.path.insert(0, '')
+  sys.path.insert(0, '/app')
 
-  preimported_locals = {
-      'memcache': memcache,
-      'urlfetch': urlfetch,
-      'users': users,
-      'db': db,
-      'ndb': ndb,
-      }
-
-  code.interact(banner=BANNER, local=preimported_locals)
+  IPython.embed(header=BANNER)
 
 
 def main():
@@ -131,7 +115,7 @@ def main():
   with open('/etc/host_ip', 'r') as f:
     servername = f.read().strip() + ':8080'
 
-  remote_api_shell(servername, 'gae-scaffold', DEFAULT_PATH, False, appengine_rpc.HttpRpcServer)
+  remote_api_shell(servername, 'dev~gae-scaffold', '/_ah/remote_api', False, appengine_rpc.HttpRpcServer)
 
 
 if __name__ == '__main__':

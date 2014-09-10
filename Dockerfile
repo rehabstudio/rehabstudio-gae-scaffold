@@ -42,8 +42,9 @@ RUN chmod a+x /usr/local/bin/remote_shell.py
 # get the ip address of the host as exposed inside the container
 RUN /sbin/ip route|awk '/default/ { print $3 }' > /etc/host_ip
 
-# use a volume to persist application data across container restarts
+# use volumes to persist application data across container restarts
 VOLUME ["/.appengine_storage"]
+VOLUME ["/.ipython"]
 
 # default run command
 CMD bash
