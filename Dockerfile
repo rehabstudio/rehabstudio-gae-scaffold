@@ -46,6 +46,17 @@ RUN /sbin/ip route|awk '/default/ { print $3 }' > /etc/host_ip
 VOLUME ["/.appengine_storage"]
 VOLUME ["/.ipython"]
 
+# create a non-root user we can use to run the application inside the container
+RUN groupadd -r aeuser -g 1000
+RUN useradd -u 1000 -r -g aeuser -d /app -s /bin/bash -c "Docker/GAE image user" aeuser
+
+# Add the fix_permissions.sh script to the $PATH and make it executable
+ADD ops/scripts/fix_permissions.sh /usr/local/bin/fix_permissions.sh
+RUN chmod a+x /usr/local/bin/fix_permissions.sh
+
+# switch to the new user account so that all commands run as `aeuser` by default
+USER aeuser
+
 # default run command
 CMD bash
 

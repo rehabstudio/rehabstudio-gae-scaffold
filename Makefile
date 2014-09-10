@@ -5,17 +5,6 @@ IMGNM = gae_scaffold/$(CID)
 STRGCNTNR = $(CID)-storage
 RNCNTNR = $(CID)-run
 
-# If running on Linux (and thus using docker directly) we set the user id to
-# that of the current user. If running on Mac (and thus on top of boot2docker)
-# we don't bother since Virtualbox takes care of ensuring any created files
-# have the correct permissions.
-UNAME := $(shell uname)
-ifeq ($(UNAME), Linux)
-	USER_ID = -u $(shell id -u $$USER)
-else ifeq ($(UNAME), Darwin)
-	USER_ID =
-endif
-
 # Make the deploy target configurable on the command line
 # user can pass `app=<appname>` or `version=<version>` to control where the
 # app gets deployed
@@ -47,7 +36,7 @@ pyshell: storage
 	docker run -t -i --rm --volumes-from $(STRGCNTNR) -v $(CURDIR)/app:/app $(IMGNM) remote_shell.py
 
 storage: build
-	-docker run -t -i --name $(STRGCNTNR) $(IMGNM) echo "Storage-only container."
+	-docker run -t -i --name $(STRGCNTNR) -u 0 $(IMGNM) fix_permissions.sh
 
 run: storage
 	@-docker kill $(RNCNTNR)
@@ -58,4 +47,4 @@ shell: storage
 	docker run -t -i --volumes-from $(STRGCNTNR) -v $(CURDIR)/app:/app -v $(CURDIR)/output:/output $(IMGNM) bash
 
 test: build
-	docker run -t -i -v $(CURDIR)/app:/app -v $(CURDIR)/output:/output $(USER_ID) $(IMGNM) make -C /app test
+	docker run -t -i -v $(CURDIR)/app:/app -v $(CURDIR)/output:/output $(IMGNM) make -C /app test
