@@ -11,7 +11,7 @@ clean:
 
 deploy: clean
 	# deploy application to the default environment
-	appcfg.py update . --oauth2 --oauth2_credential_file=~/.appengine_storage/.appcfg_oauth2 --noauth_local_webserver
+	appcfg.py update . --oauth2 --oauth2_credential_file=~/.appengine_storage/.appcfg_oauth2 --noauth_local_webserver -A $(app) -V $(version)
 
 run: clean
 	# run the appengine development server

@@ -192,6 +192,14 @@ To deploy your application to appengine, use:
 
     $ make deploy
 
+If you wish to deploy to an application other than the default (defind in the
+root-level Makefile) you can pass one of (or both) `app` or `version`
+arguments to `make deploy` like so:
+
+    $ make deploy app=someapp
+    $ make deploy version=1
+    $ make deploy app=someotherapp version=someotherversion
+
 To open a bash shell inside the container environment, use:
 
     $ make shell
