@@ -36,7 +36,7 @@ pyshell: storage
 	docker run -t -i --rm --volumes-from $(STRGCNTNR) -v $(CURDIR)/app:/app $(IMGNM) remote_shell.py
 
 storage: build
-	-docker run -t -i --name $(STRGCNTNR) -u 0 $(IMGNM) fix_permissions.sh
+	-docker run -t -i --name $(STRGCNTNR) -u 0 $(IMGNM) bootstrap_storage.sh
 
 run: storage
 	@-docker kill $(RNCNTNR)

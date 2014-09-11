@@ -45,16 +45,24 @@ RUN /sbin/ip route|awk '/default/ { print $3 }' > /etc/host_ip
 # use volumes to persist application data across container restarts
 VOLUME ["/.appengine_storage"]
 VOLUME ["/.ipython"]
+VOLUME ["/home/aeuser"]
 
 # create a non-root user we can use to run the application inside the container
 RUN groupadd -r aeuser -g 1000
-RUN useradd -u 1000 -r -g aeuser -d /app -s /bin/bash -c "Docker/GAE image user" aeuser
+RUN useradd -u 1000 -r -g aeuser -d /home/aeuser -s /bin/bash -c "Docker/GAE image user" aeuser
 
-# Add the fix_permissions.sh script to the $PATH and make it executable
-ADD ops/scripts/fix_permissions.sh /usr/local/bin/fix_permissions.sh
-RUN chmod a+x /usr/local/bin/fix_permissions.sh
+# Add the bootstrap_storage.sh script to the $PATH and make it executable
+ADD ops/scripts/bootstrap_storage.sh /usr/local/bin/bootstrap_storage.sh
+RUN chmod a+x /usr/local/bin/bootstrap_storage.sh
+
+# add .bashrc to ~/
+ADD ops/shell/bashrc /home/aeuser/.bashrc
+
+# add a custom motd to remind users of how persistance works in the container
+ADD ops/shell/motd /etc/motd
 
 # switch to the new user account so that all commands run as `aeuser` by default
+ENV HOME /home/aeuser
 USER aeuser
 
 # default run command
