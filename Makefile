@@ -26,7 +26,7 @@ build:
 	docker build -t="$(IMGNM)" .
 
 dirtycheck:
-	@python ./ops/scripts/dirtycheck.py . --quiet || (echo "Git repository is dirty: Please review and try again."; exit 1)
+	@python ./ops/scripts/dirtycheck.py . --quiet || (echo "Git repository is dirty: Please commit your changes."; exit 1)
 	@echo "Git repository is clean: Continuing."
 
 deploy: dirtycheck storage
