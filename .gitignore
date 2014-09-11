@@ -3,3 +3,4 @@ app/.coverage
 output/.cid
 output/coverage.xml
 output/nosetests.xml
+node_modules/
