@@ -1,9 +1,8 @@
 # These variables are used throughout the makefile to provide unique
 # per-project containers and images.
 CID = $(shell python ops/scripts/cidgen.py)
-IMGNM = gae_scaffold/$(CID)
-STRGCNTNR = $(CID)-storage
-RNCNTNR = $(CID)-run
+IMAGE_NAME = gae_scaffold/$(CID)
+STORAGE_CONTAINER = $(CID)-storage
 
 # Make the deploy target configurable on the command line
 # user can pass `app=<appname>` or `version=<version>` to control where the
@@ -28,35 +27,74 @@ else ifeq ($(UNAME), Darwin)
 	USE_ROOT = -u 0
 endif
 
+# Base docker run command with common parameters
+RUN_DOCKER = docker run -t -i --rm --volumes-from $(STORAGE_CONTAINER) -v $(CURDIR)/app:/app -v $(CURDIR)/output:/output
+
+
+# Show command line help message
 help:
-	@echo "deploy: Deploy the application to the configured appengine account/version."
-	@echo "run:    Run development server inside a Docker container."
-	@echo "shell:  Open a Bash shell inside the container environment."
-	@echo "test:   Run application's tests inside a docker container."
+	@echo "gae-scaffold"
+	@echo ""
+	@echo "The following commands are available:"
+	@echo ""
+	@echo "    make deploy:  Deploy the application to the specified appengine instance."
+	@echo "                  Accepts args: app, version (see Makefile comments)"
+	@echo "    make run:     Run local development server inside container."
+	@echo "    make test:    Run application's tests inside  container."
+	@echo "    make shell:   Launch a Bash shell inside container."
+	@echo "    make pyshell: Launch an IPython shell inside container."
 
+
+# Builds the docker container that is run by our other targets
 build:
-	docker build -t="$(IMGNM)" .
+	docker build -t="$(IMAGE_NAME)" .
 
+# Used to provide a persistent container in which we can store semi-permanent
+# but not critically important data i.e. deploy credentials, local databases,
+# shell history etc.
+storage: build
+	-docker run -t -i --name $(STORAGE_CONTAINER) -u 0 $(IMAGE_NAME) bootstrap_storage.sh
+
+# Ensures that no untracked/uncommitted files are present in the repository
 dirtycheck:
 	@python ./ops/scripts/dirtycheck.py . --quiet || (echo "Git repository is dirty: Please commit your changes."; exit 1)
 	@echo "Git repository is clean: Continuing."
 
+
+# Deploy the application to the live appengine environment. Deployment is only
+# possible if the repository is clean, you cannot deploy uncommitted code into
+# a prouction environment. dev, staging or live, there's no difference, don't
+# deploy untrackable code. This target accepts the following arguments:
+#
+#     app=<app_name>:       application id to deploy to e.g. `app=someapp` would deploy to someapp.appspot.com
+#     version=<version_id>: sub-version that should be used for deployment
 deploy: dirtycheck storage
-	docker run -t -i --volumes-from $(STRGCNTNR) -v $(CURDIR)/app:/app $(USE_ROOT) $(IMGNM) make -C /app deploy app=$(app) version=$(version)
+	$(RUN_DOCKER) $(USE_ROOT) $(IMAGE_NAME) make -C /app deploy app=$(app) version=$(version)
 
-pyshell: storage
-	docker run -t -i --rm --volumes-from $(STRGCNTNR) -v $(CURDIR)/app:/app $(USE_ROOT) $(IMGNM) remote_shell.py
-
-storage: build
-	-docker run -t -i --name $(STRGCNTNR) -u 0 $(IMGNM) bootstrap_storage.sh
-
+# Runs the application locally using the Appengine SDK. Your application code
+# is mounted inside the docker container and the appropriate ports are bound
+# to the host's network interface so it is possible to access the running
+# server just as you usually would at http://localhost:8080 and the admin
+# server on http://localhost:8000
 run: storage
-	@-docker kill $(RNCNTNR)
-	@-docker rm $(RNCNTNR)
-	docker run -t -i --rm --name $(RNCNTNR) --volumes-from $(STRGCNTNR) -v $(CURDIR)/app:/app -p 0.0.0.0:8080:8080 -p 0.0.0.0:8000:8000 $(USE_ROOT) $(IMGNM) make -C /app run
+	$(RUN_DOCKER) -p 0.0.0.0:8080:8080 -p 0.0.0.0:8000:8000 $(USE_ROOT) $(IMAGE_NAME) make -C /app run
 
+# Runs the application's tests using the appropriate test runners for each
+# part of the application. All artifacts produced are saved to the `output/`
+# directory on the host so they can be accessed outside the container e.g. by
+# Jenkins.
+test: storage
+	$(RUN_DOCKER) $(USE_ROOT) $(IMAGE_NAME) make -C /app test
+
+
+# Launches a Bash shell inside the container environment for development
+# purposes
 shell: storage
-	docker run -t -i --volumes-from $(STRGCNTNR) -v $(CURDIR)/app:/app -v $(CURDIR)/output:/output $(USE_ROOT) $(IMGNM) bash
+	$(RUN_DOCKER) $(USE_ROOT) $(IMAGE_NAME) bash
 
-test: build
-	docker run -t -i -v $(CURDIR)/app:/app -v $(CURDIR)/output:/output $(USE_ROOT) $(IMGNM) make -C /app test
+# Launches an IPython shell and uses appengine's remote API functionality to
+# allow the user to interact with live services from with the terminal/shell
+# environment e.g. datastore, memcache, etc. Note: This target requires that
+# you are already running a local server in another container.
+pyshell: storage
+	$(RUN_DOCKER) $(USE_ROOT) $(IMAGE_NAME) remote_shell.py
