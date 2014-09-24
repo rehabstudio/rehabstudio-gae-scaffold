@@ -28,8 +28,8 @@ RUN pip install -r /tmp/requirements.txt
 RUN npm install -g grunt-cli gulp
 
 # Download and install the Appengine Python SDK
-RUN cd /opt/ && wget -nv https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.10.zip
-RUN cd /opt/ && unzip -q google_appengine_1.9.10.zip && rm google_appengine_1.9.10.zip
+RUN cd /opt/ && wget -nv https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.11.zip
+RUN cd /opt/ && unzip -q google_appengine_1.9.11.zip && rm google_appengine_1.9.11.zip
 ENV PATH /opt/google_appengine:$PATH
 
 # patch the SDK so we can bind the remote API server to something other than localhost
