@@ -77,7 +77,7 @@ deploy: dirtycheck storage
 # server just as you usually would at http://localhost:8080 and the admin
 # server on http://localhost:8000
 run: storage
-	$(RUN_DOCKER) -p 0.0.0.0:8080:8080 -p 0.0.0.0:8000:8000 $(USE_ROOT) $(IMAGE_NAME) make -C /app run
+	$(RUN_DOCKER) -p 0.0.0.0:8080:8080 -p 0.0.0.0:8000:8000 --name gaerun-$(CID) $(USE_ROOT) $(IMAGE_NAME) make -C /app run
 
 # Runs the application's tests using the appropriate test runners for each
 # part of the application. All artifacts produced are saved to the `output/`
@@ -104,3 +104,9 @@ shell: storage
 # you are already running a local server in another container.
 pyshell: storage
 	$(RUN_DOCKER) $(USE_ROOT) $(IMAGE_NAME) remote_shell.py
+
+
+# Force stops the docker container (useful if the Appengine SDK hangs at
+# shutdown, which it *loves* to do).
+force-stop:
+	docker stop gaerun-$(CID)
