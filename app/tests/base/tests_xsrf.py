@@ -16,13 +16,13 @@
 # stdlib imports
 import os
 import time
-import unittest
 
 # local imports
 from app.base import xsrf
+from tests.testcases import BaseTestCase
 
 
-class XsrfTest(unittest.TestCase):
+class XsrfTest(BaseTestCase):
   """Test cases for base.xsrf."""
 
   def setUp(self):

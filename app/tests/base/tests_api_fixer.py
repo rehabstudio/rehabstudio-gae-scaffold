@@ -16,11 +16,11 @@
 # stdlib imports
 import json
 import pickle
-import unittest
 import yaml
 
 # local imports
 from app.base import api_fixer
+from tests.testcases import BaseTestCase
 
 
 class BadPickle(object):
@@ -29,7 +29,7 @@ class BadPickle(object):
     return tuple([eval, tuple(['[1][2]'])])
 
 
-class ApiFixerTest(unittest.TestCase):
+class ApiFixerTest(BaseTestCase):
   """Test cases for base.api_fixer."""
 
   def testJsonEscaping(self):

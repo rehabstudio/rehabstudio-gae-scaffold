@@ -13,23 +13,13 @@
 #     limitations under the License.
 """Tests for base.models.
 """
-# stdlib imports
-import unittest
-
-# third-party imports
-from google.appengine.ext import testbed
-
 # local imports
 from app.base import models
+from tests.testcases import BaseTestCase
 
 
-class ModelsTest(unittest.TestCase):
+class ModelsTest(BaseTestCase):
   """Test cases for base.models."""
-
-  def setUp(self):
-    self.testbed = testbed.Testbed()
-    self.testbed.activate()
-    self.testbed.init_datastore_v3_stub()
 
   def testConfigurationAutomaticallyGenerated(self):
     config = models.GetApplicationConfiguration()

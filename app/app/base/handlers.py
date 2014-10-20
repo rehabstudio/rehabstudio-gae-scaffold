@@ -165,6 +165,9 @@ class BaseHandler(webapp2.RequestHandler):
     self._RawWrite = self.response.out.write
     self.response.out.write = self._ReplacementWrite
 
+    # Get a session store for this request.
+    self.session_store = sessions.get_store(request=self.request)
+
   # All content should be rendered through a template system to reduce the
   # risk/likelihood of XSS issues.  Access to the original function
   # self.response.out.write is available via self._RawWrite for exceptional
@@ -209,9 +212,6 @@ class BaseHandler(webapp2.RequestHandler):
     return users.get_current_user()
 
   def dispatch(self):
-    # Get a session store for this request.
-    self.session_store = sessions.get_store(request=self.request)
-
     try:
       self._SetCommonResponseHeaders()
       super(BaseHandler, self).dispatch()

@@ -15,16 +15,13 @@
 """
 # stdlib imports
 import exceptions
-import unittest
 import webapp2
-
-# third-party imports
-from google.appengine.ext import testbed
 
 # local imports
 from app import config
 from app.base import handlers
 from app.base import xsrf
+from tests.testcases import BaseTestCase
 
 
 class DummyHandler(handlers.AuthenticatedHandler):
@@ -67,26 +64,15 @@ class DummyTaskHandler(handlers.BaseTaskHandler):
     self._RawWrite('get_succeeded')
 
 
-class HandlersTest(unittest.TestCase):
+class HandlersTest(BaseTestCase):
   """Test cases for base.handlers."""
 
   def setUp(self):
-    self.testbed = testbed.Testbed()
-    self.testbed.activate()
-    self.testbed.init_datastore_v3_stub()
-    self.testbed.init_memcache_stub()
     self.app = webapp2.WSGIApplication([('/', DummyHandler),
                                         ('/ajax', DummyAjaxHandler),
                                         ('/cron', DummyCronHandler),
                                         ('/task', DummyTaskHandler)],
-                                        config=config.CONFIG)
-
-  def _FakeLogin(self):
-    """Sets up the environment to have a fake user logged in."""
-    self.testbed.setup_env(
-        USER_EMAIL='user@example.com',
-        USER_ID='123',
-        overwrite=True)
+                                       config=config.CONFIG)
 
   def testHandlerCannotOverrideFinalMethods(self):
 
