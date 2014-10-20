@@ -94,8 +94,6 @@ matures.
 - Routes can get messy, so now live in their own `routes.py` module for easier
   maintenance.
 - PEP8 everywhere (sort of).
-- Patched Appengine SDK to allow connections to a local remote_api server
-  using a host other than localhost.
 
 
 ## Installing Docker
