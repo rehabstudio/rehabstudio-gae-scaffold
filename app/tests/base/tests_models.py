@@ -19,9 +19,9 @@ from tests.testcases import BaseTestCase
 
 
 class ModelsTest(BaseTestCase):
-  """Test cases for base.models."""
+    """Test cases for base.models."""
 
-  def testConfigurationAutomaticallyGenerated(self):
-    config = models.GetApplicationConfiguration()
-    self.assertIsNotNone(config)
-    self.assertIsNotNone(config.xsrf_key)
+    def testConfigurationAutomaticallyGenerated(self):
+        config = models.GetApplicationConfiguration()
+        self.assertIsNotNone(config)
+        self.assertIsNotNone(config.xsrf_key)

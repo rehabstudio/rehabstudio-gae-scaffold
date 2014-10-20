@@ -14,11 +14,11 @@ from tests.testcases import BaseTestCase
 
 
 class SetHandler(handlers.BaseHandler):
-  """Convenience class to verify successful requests."""
+    """Convenience class to verify successful requests."""
 
-  def get(self):
-    self.session['test'] = 'just testing'
-    self._RawWrite('success')
+    def get(self):
+        self.session['test'] = 'just testing'
+        self._RawWrite('success')
 
 
 class GetHandler(SetHandler):

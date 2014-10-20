@@ -35,50 +35,50 @@ from . import xsrf
 # Assorted decorators that can be used inside a webapp2.RequestHandler object
 # to assert certain preconditions before entering any method.
 def requires_auth(f):
-  """A decorator that requires a currently logged in user."""
-  @functools.wraps(f)
-  def wrapper(self, *args, **kwargs):
-    if not users.get_current_user():
-      self.DenyAccess()
-    else:
-      return f(self, *args, **kwargs)
-  return wrapper
+    """A decorator that requires a currently logged in user."""
+    @functools.wraps(f)
+    def wrapper(self, *args, **kwargs):
+        if not users.get_current_user():
+            self.DenyAccess()
+        else:
+            return f(self, *args, **kwargs)
+    return wrapper
 
 
 def requires_admin(f):
-  """A decorator that requires a currently logged in administrator."""
-  @functools.wraps(f)
-  def wrapper(self, *args, **kwargs):
-    if not users.is_current_user_admin():
-      self.DenyAccess()
-    else:
-      return f(self, *args, **kwargs)
-  return wrapper
+    """A decorator that requires a currently logged in administrator."""
+    @functools.wraps(f)
+    def wrapper(self, *args, **kwargs):
+        if not users.is_current_user_admin():
+            self.DenyAccess()
+        else:
+            return f(self, *args, **kwargs)
+    return wrapper
 
 
 def xsrf_protected(f):
-  """Decorator to validate XSRF tokens for any verb but GET, HEAD, OPTIONS."""
-  @functools.wraps(f)
-  def wrapper(self, *args, **kwargs):
-    non_xsrf_protected_verbs = ['options', 'head', 'get']
-    if (self.request.method.lower() in non_xsrf_protected_verbs or
-      self._RequestContainsValidXsrfToken()):
-      return f(self, *args, **kwargs)
-    else:
-      self.XsrfFail()
-  return wrapper
+    """Decorator to validate XSRF tokens for any verb but GET, HEAD, OPTIONS."""
+    @functools.wraps(f)
+    def wrapper(self, *args, **kwargs):
+        non_xsrf_protected_verbs = ['options', 'head', 'get']
+        if (self.request.method.lower() in non_xsrf_protected_verbs or
+                self._RequestContainsValidXsrfToken()):
+            return f(self, *args, **kwargs)
+        else:
+            self.XsrfFail()
+    return wrapper
 
 
 # Utility functions.
 def _GetXsrfKey():
-  """Returns the current key for generating and verifying XSRF tokens."""
-  client = memcache.Client()
-  xsrf_key = client.get('xsrf_key')
-  if not xsrf_key:
-    config = models.GetApplicationConfiguration()
-    xsrf_key = config.xsrf_key
-    client.set('xsrf_key', xsrf_key)
-  return xsrf_key
+    """Returns the current key for generating and verifying XSRF tokens."""
+    client = memcache.Client()
+    xsrf_key = client.get('xsrf_key')
+    if not xsrf_key:
+        config = models.GetApplicationConfiguration()
+        xsrf_key = config.xsrf_key
+        client.set('xsrf_key', xsrf_key)
+    return xsrf_key
 
 
 # Classes with a __metaclass__ of _HandlerMeta may not contain any methods
@@ -117,344 +117,352 @@ _XSSI_PREFIX = ')]}\',\n'
 
 
 class SecurityError(Exception):
-  pass
+    pass
 
 
 class _HandlerMeta(abc.ABCMeta):
-  """Metaclass for our secure base handlers.
+    """Metaclass for our secure base handlers.
 
-  When a class with this metaclass is defined, the fields
-  are checked to ensure that certain methods we would like to approximate as
-  'final' are not declared in subclasses. This is because we provide a
-  default implementation which enforces various security related functionality.
+    When a class with this metaclass is defined, the fields
+    are checked to ensure that certain methods we would like to approximate as
+    'final' are not declared in subclasses. This is because we provide a
+    default implementation which enforces various security related functionality.
 
-  Class names that can bypass this whitelist are listed in
-  _RESTRICTED_FUNCTION_CLASS_WHITELIST.  Restricted methods are listed in
-  _RESTRICTED_FUNCTION_LIST.
-  """
+    Class names that can bypass this whitelist are listed in
+    _RESTRICTED_FUNCTION_CLASS_WHITELIST.  Restricted methods are listed in
+    _RESTRICTED_FUNCTION_LIST.
+    """
 
-  def __new__(mcs, name, bases, dct):
-    if name not in _RESTRICTED_FUNCTION_CLASS_WHITELIST:
-      for func in _RESTRICTED_FUNCTION_LIST:
-        if func in dct:
-          raise SecurityError('%s attempts to override restricted method %s' %
-                              (name, func))
-    return super(_HandlerMeta, mcs).__new__(mcs, name, bases, dct)
+    def __new__(mcs, name, bases, dct):
+        if name not in _RESTRICTED_FUNCTION_CLASS_WHITELIST:
+            for func in _RESTRICTED_FUNCTION_LIST:
+                if func in dct:
+                    raise SecurityError('%s attempts to override restricted method %s' %
+                                        (name, func))
+        return super(_HandlerMeta, mcs).__new__(mcs, name, bases, dct)
 
 
 class BaseHandler(webapp2.RequestHandler):
-  """Base handler for servicing unauthenticated user requests."""
+    """Base handler for servicing unauthenticated user requests."""
 
-  __metaclass__ = _HandlerMeta
+    __metaclass__ = _HandlerMeta
 
-  def __init__(self, request, response):
-    self.initialize(request, response)
-    api_fixer.ReplaceDefaultArgument(response.set_cookie.im_func, 'secure',
-                                     not constants.IS_DEV_APPSERVER)
-    api_fixer.ReplaceDefaultArgument(response.set_cookie.im_func, 'httponly',
-                                     True)
-    if self.current_user:
-      self._xsrf_token = xsrf.GenerateToken(_GetXsrfKey(),
-                                            self.current_user.email())
-      if self.app.config.get('using_angular', constants.DEFAULT_ANGULAR):
-        # AngularJS requires a JS readable XSRF-TOKEN cookie and will pass this
-        # back in AJAX requests.
-        self.response.set_cookie('XSRF-TOKEN', self._xsrf_token, httponly=False)
-    else:
-      self._xsrf_token = None
-    self._RawWrite = self.response.out.write
-    self.response.out.write = self._ReplacementWrite
+    def __init__(self, request, response):
+        self.initialize(request, response)
+        api_fixer.ReplaceDefaultArgument(response.set_cookie.im_func, 'secure',
+                                         not constants.IS_DEV_APPSERVER)
+        api_fixer.ReplaceDefaultArgument(response.set_cookie.im_func, 'httponly',
+                                         True)
+        if self.current_user:
+            self._xsrf_token = xsrf.GenerateToken(_GetXsrfKey(),
+                                                  self.current_user.email())
+            if self.app.config.get('using_angular', constants.DEFAULT_ANGULAR):
+                # AngularJS requires a JS readable XSRF-TOKEN cookie and will pass this
+                # back in AJAX requests.
+                self.response.set_cookie(
+                    'XSRF-TOKEN', self._xsrf_token, httponly=False)
+        else:
+            self._xsrf_token = None
+        self._RawWrite = self.response.out.write
+        self.response.out.write = self._ReplacementWrite
 
-    # Get a session store for this request.
-    self.session_store = sessions.get_store(request=self.request)
+        # Get a session store for this request.
+        self.session_store = sessions.get_store(request=self.request)
 
-  # All content should be rendered through a template system to reduce the
-  # risk/likelihood of XSS issues.  Access to the original function
-  # self.response.out.write is available via self._RawWrite for exceptional
-  # circumstances.
-  def _ReplacementWrite(*args, **kwargs):
-    raise SecurityError('All response content must originate via render() or'
-                        'render_json()')
+    # All content should be rendered through a template system to reduce the
+    # risk/likelihood of XSS issues.  Access to the original function
+    # self.response.out.write is available via self._RawWrite for exceptional
+    # circumstances.
+    def _ReplacementWrite(*args, **kwargs):
+        raise SecurityError('All response content must originate via render() or'
+                            'render_json()')
 
-  def _SetCommonResponseHeaders(self):
-    """Sets various headers with security implications."""
-    frame_policy = self.app.config.get('framing_policy', constants.DENY)
-    frame_header_value = constants.X_FRAME_OPTIONS_VALUES.get(frame_policy, '')
-    if frame_header_value:
-      self.response.headers['X-Frame-Options'] = frame_header_value
+    def _SetCommonResponseHeaders(self):
+        """Sets various headers with security implications."""
+        frame_policy = self.app.config.get('framing_policy', constants.DENY)
+        frame_header_value = constants.X_FRAME_OPTIONS_VALUES.get(
+            frame_policy, '')
+        if frame_header_value:
+            self.response.headers['X-Frame-Options'] = frame_header_value
 
-    hsts_policy = self.app.config.get('hsts_policy',
-                                      constants.DEFAULT_HSTS_POLICY)
-    if self.request.scheme.lower() == 'https' and hsts_policy:
-      include_subdomains = bool(hsts_policy.get('includeSubdomains', False))
-      subdomain_string = '; includeSubdomains' if include_subdomains else ''
-      hsts_value = 'max-age=%d%s' % (int(hsts_policy.get('max_age')),
-                                     subdomain_string)
-      self.response.headers['Strict-Transport-Security'] = hsts_value
+        hsts_policy = self.app.config.get('hsts_policy',
+                                          constants.DEFAULT_HSTS_POLICY)
+        if self.request.scheme.lower() == 'https' and hsts_policy:
+            include_subdomains = bool(
+                hsts_policy.get('includeSubdomains', False))
+            subdomain_string = '; includeSubdomains' if include_subdomains else ''
+            hsts_value = 'max-age=%d%s' % (int(hsts_policy.get('max_age')),
+                                           subdomain_string)
+            self.response.headers['Strict-Transport-Security'] = hsts_value
 
-    self.response.headers['X-XSS-Protection'] = '1; mode=block'
-    self.response.headers['X-Content-Type-Options'] = 'nosniff'
+        self.response.headers['X-XSS-Protection'] = '1; mode=block'
+        self.response.headers['X-Content-Type-Options'] = 'nosniff'
 
-    csp_policy = self.app.config.get('csp_policy', constants.DEFAULT_CSP_POLICY)
-    report_only = False
-    if 'reportOnly' in csp_policy:
-      report_only = csp_policy.get('reportOnly')
-      del csp_policy['reportOnly']
-    header_name = ('Content-Security-Policy%s' %
-                   ('-Report-Only' if report_only else ''))
-    policies = []
-    for (k, v) in csp_policy.iteritems():
-      policies.append('%s %s' % (k, v))
-    self.response.headers.add(header_name, '; '.join(policies))
+        csp_policy = self.app.config.get(
+            'csp_policy', constants.DEFAULT_CSP_POLICY)
+        report_only = False
+        if 'reportOnly' in csp_policy:
+            report_only = csp_policy.get('reportOnly')
+            del csp_policy['reportOnly']
+        header_name = ('Content-Security-Policy%s' %
+                       ('-Report-Only' if report_only else ''))
+        policies = []
+        for (k, v) in csp_policy.iteritems():
+            policies.append('%s %s' % (k, v))
+        self.response.headers.add(header_name, '; '.join(policies))
 
-  @webapp2.cached_property
-  def current_user(self):
-    return users.get_current_user()
+    @webapp2.cached_property
+    def current_user(self):
+        return users.get_current_user()
 
-  def dispatch(self):
-    try:
-      self._SetCommonResponseHeaders()
-      super(BaseHandler, self).dispatch()
-    finally:
-      # Save all sessions.
-      self.session_store.save_sessions(self.response)
+    def dispatch(self):
+        try:
+            self._SetCommonResponseHeaders()
+            super(BaseHandler, self).dispatch()
+        finally:
+            # Save all sessions.
+            self.session_store.save_sessions(self.response)
 
-  @webapp2.cached_property
-  def session(self):
-    # Returns a session using the default cookie key.
-    return self.session_store.get_session()
+    @webapp2.cached_property
+    def session(self):
+        # Returns a session using the default cookie key.
+        return self.session_store.get_session()
 
-  @webapp2.cached_property
-  def jinja2(self):
-    extensions = ['jinja2.ext.autoescape', 'jinja2.ext.with_']
-    env = jinja2.Environment(
-        autoescape=True,
-        auto_reload=constants.DEBUG,
-        loader=jinja2.FileSystemLoader(constants.TEMPLATE_DIR),
-        extensions=extensions,
-    )
-    for k, v in self.app.config['jinja2']['filters'].items():
-      env.filters[k] = v
-    return env
+    @webapp2.cached_property
+    def jinja2(self):
+        extensions = ['jinja2.ext.autoescape', 'jinja2.ext.with_']
+        env = jinja2.Environment(
+            autoescape=True,
+            auto_reload=constants.DEBUG,
+            loader=jinja2.FileSystemLoader(constants.TEMPLATE_DIR),
+            extensions=extensions,
+        )
+        for k, v in self.app.config['jinja2']['filters'].items():
+            env.filters[k] = v
+        return env
 
-  def render_to_string(self, template_name, template_values=None):
-    """Renders template_name with template_values and returns as a string."""
-    if not template_values:
-      template_values = {}
+    def render_to_string(self, template_name, template_values=None):
+        """Renders template_name with template_values and returns as a string."""
+        if not template_values:
+            template_values = {}
 
-    # add xsrf token to the context
-    template_values['_xsrf'] = self._xsrf_token
+        # add xsrf token to the context
+        template_values['_xsrf'] = self._xsrf_token
 
-    # add any functions/constants defined in config to the context
-    for k, v in self.app.config['jinja2']['globals'].items():
-      try:
-        template_values[k]
-      except KeyError:
-        template_values[k] = v
+        # add any functions/constants defined in config to the context
+        for k, v in self.app.config['jinja2']['globals'].items():
+            try:
+                template_values[k]
+            except KeyError:
+                template_values[k] = v
 
-    # add common request-specific items to the context
-    template_values['request'] = self.request
-    template_values['session'] = self.session
-    template_values['user'] = users.get_current_user()
+        # add common request-specific items to the context
+        template_values['request'] = self.request
+        template_values['session'] = self.session
+        template_values['user'] = users.get_current_user()
 
-    # render and return template as string
-    t = self.jinja2.get_template(template_name)
-    return t.render(template_values)
+        # render and return template as string
+        t = self.jinja2.get_template(template_name)
+        return t.render(template_values)
 
-  def render(self, template_name, template_values=None):
-    """Renders template_name with template_values and writes to the response."""
-    self._RawWrite(self.render_to_string(template_name, template_values))
+    def render(self, template_name, template_values=None):
+        """Renders template_name with template_values and writes to the response."""
+        self._RawWrite(self.render_to_string(template_name, template_values))
 
 
 class BaseCronHandler(BaseHandler):
-  """Base handler for servicing Cron requests.
+    """Base handler for servicing Cron requests.
 
-  This handler enforces that inbound requests contain the X-AppEngine-Cron
-  header, which AppEngine guarantees is only present on actual invocations
-  according to the cron schedule, or crafted requests by an administrator
-  of the application (the header is filtered out from normal user requests).
-  """
+    This handler enforces that inbound requests contain the X-AppEngine-Cron
+    header, which AppEngine guarantees is only present on actual invocations
+    according to the cron schedule, or crafted requests by an administrator
+    of the application (the header is filtered out from normal user requests).
+    """
 
-  __metaclass__ = _HandlerMeta
+    __metaclass__ = _HandlerMeta
 
-  def dispatch(self):
-    header = self.request.headers.get('X-AppEngine-Cron', 'false')
-    if header != 'true':
-      raise SecurityError('attempt to access cron handler without '
-                          'X-AppEngine-Cron header')
-    super(BaseCronHandler, self).dispatch()
+    def dispatch(self):
+        header = self.request.headers.get('X-AppEngine-Cron', 'false')
+        if header != 'true':
+            raise SecurityError('attempt to access cron handler without '
+                                'X-AppEngine-Cron header')
+        super(BaseCronHandler, self).dispatch()
 
 
 class BaseTaskHandler(BaseHandler):
-  """Base handler for servicing task requests.
+    """Base handler for servicing task requests.
 
-  This handler enforces that inbound requests contain the X-AppEngine-QueueName
-  header, which AppEngine guarantees is only present on requests from the
-  Task Queue API, or crafted requests by an administrator of the application
-  (the header is filtered out from normal user requests).
-  """
+    This handler enforces that inbound requests contain the X-AppEngine-QueueName
+    header, which AppEngine guarantees is only present on requests from the
+    Task Queue API, or crafted requests by an administrator of the application
+    (the header is filtered out from normal user requests).
+    """
 
-  __metaclass__ = _HandlerMeta
+    __metaclass__ = _HandlerMeta
 
-  def dispatch(self):
-    header = self.request.headers.get('X-AppEngine-QueueName', None)
-    if not header:
-      raise SecurityError('attempt to access task handler without '
-                          'X-AppEngine-QueueName header')
-    super(BaseTaskHandler, self).dispatch()
+    def dispatch(self):
+        header = self.request.headers.get('X-AppEngine-QueueName', None)
+        if not header:
+            raise SecurityError('attempt to access task handler without '
+                                'X-AppEngine-QueueName header')
+        super(BaseTaskHandler, self).dispatch()
 
 
 class BaseAjaxHandler(BaseHandler):
-  """Base handler for servicing unauthenticated AJAX requests.
+    """Base handler for servicing unauthenticated AJAX requests.
 
-  Responses to GET requests will be prefixed by _XSSI_PREFIX.  Requests
-  using other HTTP verbs will not include such a prefix.
-  """
+    Responses to GET requests will be prefixed by _XSSI_PREFIX.  Requests
+    using other HTTP verbs will not include such a prefix.
+    """
 
-  __metaclass__ = _HandlerMeta
+    __metaclass__ = _HandlerMeta
 
-  def _SetAjaxResponseHeaders(self):
-    self.response.headers['Content-Disposition'] = 'attachment; filename=json'
-    self.response.headers['Content-Type'] = 'application/json; charset=utf-8'
+    def _SetAjaxResponseHeaders(self):
+        self.response.headers[
+            'Content-Disposition'] = 'attachment; filename=json'
+        self.response.headers[
+            'Content-Type'] = 'application/json; charset=utf-8'
 
-  def dispatch(self):
-    self._SetAjaxResponseHeaders()
-    if self.request.method.lower() == 'get':
-      self._RawWrite(_XSSI_PREFIX)
-    super(BaseAjaxHandler, self).dispatch()
+    def dispatch(self):
+        self._SetAjaxResponseHeaders()
+        if self.request.method.lower() == 'get':
+            self._RawWrite(_XSSI_PREFIX)
+        super(BaseAjaxHandler, self).dispatch()
 
-  def render(self, *args, **kwargs):
-    raise SecurityError('AJAX handlers must use render_json()')
+    def render(self, *args, **kwargs):
+        raise SecurityError('AJAX handlers must use render_json()')
 
-  def render_json(self, obj):
-    self._RawWrite(json.dumps(obj))
+    def render_json(self, obj):
+        self._RawWrite(json.dumps(obj))
 
 
 class AuthenticatedHandler(BaseHandler):
-  """Base handler for servicing authenticated user requests.
+    """Base handler for servicing authenticated user requests.
 
-  Implementations should provide an implementation of DenyAccess()
-  and XsrfFail() to handle unauthenticated requests or invalid XSRF tokens.
+    Implementations should provide an implementation of DenyAccess()
+    and XsrfFail() to handle unauthenticated requests or invalid XSRF tokens.
 
-  POST requests will be rejected unless the request contains a
-  parameter named 'xsrf' which is a valid XSRF token for the
-  currently authenticated user.
-  """
+    POST requests will be rejected unless the request contains a
+    parameter named 'xsrf' which is a valid XSRF token for the
+    currently authenticated user.
+    """
 
-  __metaclass__ = _HandlerMeta
+    __metaclass__ = _HandlerMeta
 
-  @requires_auth
-  @xsrf_protected
-  def dispatch(self):
-    super(AuthenticatedHandler, self).dispatch()
+    @requires_auth
+    @xsrf_protected
+    def dispatch(self):
+        super(AuthenticatedHandler, self).dispatch()
 
-  def _RequestContainsValidXsrfToken(self):
-    token = self.request.get('xsrf') or self.request.headers.get('X-XSRF-TOKEN')
-    # By default, Angular's $http service will add quotes around the
-    # X-XSRF-TOKEN.
-    if (token and
-      self.app.config.get('using_angular', constants.DEFAULT_ANGULAR) and
-      token[0] == '"' and token[-1] == '"'):
-      token = token[1:-1]
+    def _RequestContainsValidXsrfToken(self):
+        token = self.request.get(
+            'xsrf') or self.request.headers.get('X-XSRF-TOKEN')
+        # By default, Angular's $http service will add quotes around the
+        # X-XSRF-TOKEN.
+        if (token and
+                self.app.config.get('using_angular', constants.DEFAULT_ANGULAR) and
+                token[0] == '"' and token[-1] == '"'):
+            token = token[1:-1]
 
-    if xsrf.ValidateToken(_GetXsrfKey(), self.current_user.email(),
-                          token):
-      return True
-    return False
+        if xsrf.ValidateToken(_GetXsrfKey(), self.current_user.email(),
+                              token):
+            return True
+        return False
 
-  @abc.abstractmethod
-  def DenyAccess(self):
-    pass
+    @abc.abstractmethod
+    def DenyAccess(self):
+        pass
 
-  @abc.abstractmethod
-  def XsrfFail(self):
-    pass
+    @abc.abstractmethod
+    def XsrfFail(self):
+        pass
 
 
 class AuthenticatedAjaxHandler(BaseAjaxHandler):
-  """Base handler for servicing AJAX requests.
+    """Base handler for servicing AJAX requests.
 
-  Implementations should provide an implementation of DenyAccess()
-  and XsrfFail() to handle unauthenticated requests or invalid XSRF tokens.
+    Implementations should provide an implementation of DenyAccess()
+    and XsrfFail() to handle unauthenticated requests or invalid XSRF tokens.
 
-  POST requests will be rejected unless the request contains a
-  parameter named 'xsrf', OR an HTTP header named 'X-XSRF-Token'
-  which is a valid XSRF token for the currently authenticated user.
+    POST requests will be rejected unless the request contains a
+    parameter named 'xsrf', OR an HTTP header named 'X-XSRF-Token'
+    which is a valid XSRF token for the currently authenticated user.
 
-  Responses to GET requests will be prefixed by _XSSI_PREFIX.  Requests
-  using other HTTP verbs will not include such a prefix.
-  """
+    Responses to GET requests will be prefixed by _XSSI_PREFIX.  Requests
+    using other HTTP verbs will not include such a prefix.
+    """
 
-  __metaclass__ = _HandlerMeta
+    __metaclass__ = _HandlerMeta
 
-  @requires_auth
-  @xsrf_protected
-  def dispatch(self):
-    super(AuthenticatedAjaxHandler, self).dispatch()
+    @requires_auth
+    @xsrf_protected
+    def dispatch(self):
+        super(AuthenticatedAjaxHandler, self).dispatch()
 
-  def _RequestContainsValidXsrfToken(self):
-    token = self.request.get('xsrf') or self.request.headers.get('X-XSRF-Token')
-    # By default, Angular's $http service will add quotes around the
-    # X-XSRF-TOKEN.
-    if (token and
-      self.app.config.get('using_angular', constants.DEFAULT_ANGULAR) and
-      token[0] == '"' and token[-1] == '"'):
-      token = token[1:-1]
+    def _RequestContainsValidXsrfToken(self):
+        token = self.request.get(
+            'xsrf') or self.request.headers.get('X-XSRF-Token')
+        # By default, Angular's $http service will add quotes around the
+        # X-XSRF-TOKEN.
+        if (token and
+                self.app.config.get('using_angular', constants.DEFAULT_ANGULAR) and
+                token[0] == '"' and token[-1] == '"'):
+            token = token[1:-1]
 
-    if xsrf.ValidateToken(_GetXsrfKey(), self.current_user.email(),
-                          token):
-      return True
-    return False
+        if xsrf.ValidateToken(_GetXsrfKey(), self.current_user.email(),
+                              token):
+            return True
+        return False
 
-  @abc.abstractmethod
-  def DenyAccess(self):
-    pass
+    @abc.abstractmethod
+    def DenyAccess(self):
+        pass
 
-  @abc.abstractmethod
-  def XsrfFail(self):
-    pass
+    @abc.abstractmethod
+    def XsrfFail(self):
+        pass
 
 
 class AdminHandler(AuthenticatedHandler):
-  """Base handler for servicing administrator requests.
+    """Base handler for servicing administrator requests.
 
-  Implementations should provide an implementation of DenyAccess()
-  and XsrfFail() to handle unauthenticated requests or invalid XSRF tokens.
+    Implementations should provide an implementation of DenyAccess()
+    and XsrfFail() to handle unauthenticated requests or invalid XSRF tokens.
 
-  Requests will be rejected if the currently logged in user is
-  not an administrator.
+    Requests will be rejected if the currently logged in user is
+    not an administrator.
 
-  POST requests will be rejected unless the request contains a
-  parameter named 'xsrf' which is a valid XSRF token for the
-  currently authenticated user.
-  """
+    POST requests will be rejected unless the request contains a
+    parameter named 'xsrf' which is a valid XSRF token for the
+    currently authenticated user.
+    """
 
-  __metaclass__ = _HandlerMeta
+    __metaclass__ = _HandlerMeta
 
-  @requires_admin
-  def dispatch(self):
-    super(AdminHandler, self).dispatch()
+    @requires_admin
+    def dispatch(self):
+        super(AdminHandler, self).dispatch()
 
 
 class AdminAjaxHandler(AuthenticatedAjaxHandler):
-  """Base handler for servicing AJAX administrator requests.
+    """Base handler for servicing AJAX administrator requests.
 
-  Implementations should provide an implementation of DenyAccess()
-  and XsrfFail() to handle unauthenticated requests or invalid XSRF tokens.
+    Implementations should provide an implementation of DenyAccess()
+    and XsrfFail() to handle unauthenticated requests or invalid XSRF tokens.
 
-  Requests will be rejected if the currently logged in user is
-  not an administrator.
+    Requests will be rejected if the currently logged in user is
+    not an administrator.
 
-  POST requests will be rejected unless the request contains a
-  parameter named 'xsrf', OR an HTTP header named 'X-XSRF-Token'
-  which is a valid XSRF token for the currently authenticated user.
+    POST requests will be rejected unless the request contains a
+    parameter named 'xsrf', OR an HTTP header named 'X-XSRF-Token'
+    which is a valid XSRF token for the currently authenticated user.
 
-  Responses to GET requests will be prefixed by _XSSI_PREFIX.  Requests
-  using other HTTP verbs will not include such a prefix.
-  """
+    Responses to GET requests will be prefixed by _XSSI_PREFIX.  Requests
+    using other HTTP verbs will not include such a prefix.
+    """
 
-  __metaclass__ = _HandlerMeta
+    __metaclass__ = _HandlerMeta
 
-  @requires_admin
-  def dispatch(self):
-    super(AdminAjaxHandler, self).dispatch()
+    @requires_admin
+    def dispatch(self):
+        super(AdminAjaxHandler, self).dispatch()

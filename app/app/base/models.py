@@ -22,19 +22,19 @@ from google.appengine.ext import ndb
 
 @ndb.transactional
 def GetApplicationConfiguration():
-  """Returns the application configuration, creating it if necessary."""
-  key = ndb.Key(Config, 'appconfig')
-  entity = key.get()
-  if not entity:
-    entity = Config(key=key)
-    entity.session_key = os.urandom(16)
-    entity.xsrf_key = os.urandom(16)
-    entity.put()
-  return entity
+    """Returns the application configuration, creating it if necessary."""
+    key = ndb.Key(Config, 'appconfig')
+    entity = key.get()
+    if not entity:
+        entity = Config(key=key)
+        entity.session_key = os.urandom(16)
+        entity.xsrf_key = os.urandom(16)
+        entity.put()
+    return entity
 
 
 class Config(ndb.Model):
-  """A simple key-value store for application configuration settings."""
+    """A simple key-value store for application configuration settings."""
 
-  session_key = ndb.BlobProperty()
-  xsrf_key = ndb.BlobProperty()
+    session_key = ndb.BlobProperty()
+    xsrf_key = ndb.BlobProperty()

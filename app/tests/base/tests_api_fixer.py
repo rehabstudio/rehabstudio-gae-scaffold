@@ -24,41 +24,42 @@ from tests.testcases import BaseTestCase
 
 
 class BadPickle(object):
-  """Dummy object."""
-  def __reduce__(self):
-    return tuple([eval, tuple(['[1][2]'])])
+    """Dummy object."""
+
+    def __reduce__(self):
+        return tuple([eval, tuple(['[1][2]'])])
 
 
 class ApiFixerTest(BaseTestCase):
-  """Test cases for base.api_fixer."""
+    """Test cases for base.api_fixer."""
 
-  def testJsonEscaping(self):
-    o = {'foo': '<script>alert(1);</script>'}
-    self.assertFalse('<' in json.dumps(o))
+    def testJsonEscaping(self):
+        o = {'foo': '<script>alert(1);</script>'}
+        self.assertFalse('<' in json.dumps(o))
 
-  def testYamlLoading(self):
-    unsafe = '!!python/object/apply:os.system ["ls"]'
-    try:
-      yaml.load(unsafe)
-      self.fail('loading unsafe YAML object succeeded')
-    except yaml.constructor.ConstructorError:
-      pass
+    def testYamlLoading(self):
+        unsafe = '!!python/object/apply:os.system ["ls"]'
+        try:
+            yaml.load(unsafe)
+            self.fail('loading unsafe YAML object succeeded')
+        except yaml.constructor.ConstructorError:
+            pass
 
-  def testPickle(self):
-    b = { 'foo': BadPickle() }
-    s = pickle.dumps(b)
-    try:
-      b = pickle.loads(s)
-      self.fail('BadPickle() loaded successfully')
-    except IndexError:
-      self.fail('pickled code execution')
-    except api_fixer.ApiSecurityException:
-      pass
+    def testPickle(self):
+        b = {'foo': BadPickle()}
+        s = pickle.dumps(b)
+        try:
+            b = pickle.loads(s)
+            self.fail('BadPickle() loaded successfully')
+        except IndexError:
+            self.fail('pickled code execution')
+        except api_fixer.ApiSecurityException:
+            pass
 
-    foo = { 'bar': [1, 2, 3] }
-    s = pickle.dumps(foo)
-    try:
-      foo = pickle.loads(s)
-      self.assertEqual(foo['bar'][0], 1)
-    except Exception:
-      self.fail('safe unpickling failed')
+        foo = {'bar': [1, 2, 3]}
+        s = pickle.dumps(foo)
+        try:
+            foo = pickle.loads(s)
+            self.assertEqual(foo['bar'][0], 1)
+        except Exception:
+            self.fail('safe unpickling failed')
