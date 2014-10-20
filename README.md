@@ -101,84 +101,48 @@ matures.
 ## Installing Docker
 ***
 
+**NOTE:** The minimum required version of docker is 1.3. Docker/boot2docker
+1.3.0 added support for mounted volumes when using boot2docker on OSX.
+
 ### Linux
 
 Docker is best supported on Linux, you can probably find packages for your
 preferred distribution [here][docker_install].
 
-Once installed, skip ahead to [Getting the scaffold](#getting-the-scaffold) below.
-
 ### OSX
 
-Installing and configuring Docker on OSX isn't quite as straightforward as it
-is on Linux (yet). The [boot2docker][boot2docker] project provides a
-lightweight Linux VM that acts as a (mostly) transparent way to run docker on
-OSX.
+Install Docker and boot2docker following the instructions on
+[this page][docker_osx_install].
 
-First, install Docker and boot2docker following the instructions on
-[this page][docker_osx_install]. Once you've installed Docker and launched
-`boot2docker` for the first time, you need to stop it again so we can make
-further modifications: `$ boot2docker stop`.
-
-Since Docker on OSX is technically running inside a virtual machine and not
-directly on the host OS, any volumes mounted will be on the VM's filesystem
-and any bound ports will be exposed only to the boot2docker VM. We can work
-around these limitations with a few tweaks to our setup.
-
-In order to mount folders from your host OS into the boot2docker VM you'll
-need to download a version of the boot2docker iso with Virtualbox's Guest
-Additions installed:
-
-    $ mkdir -p ~/.boot2docker
-    $ curl http://static.dockerfiles.io/boot2docker-v1.2.0-virtualbox-guest-additions-v4.3.14.iso -o ~/.boot2docker/boot2docker.iso
-
-Next, you need to tell Virtualbox to mount your `/Users` directory inside the
-VM:
-
-    $ VBoxManage sharedfolder add boot2docker-vm -name home -hostpath /Users
-
-And that should be it. Let’s verify:
-
-    $ boot2docker up
-    $ boot2docker ssh "ls /Users"
-
-You should see a list of all user's home folders from your host OS. Next, we
+Next, we
 need to forward the appropriate ports so that we can reach the running
 appengine development server directly from the host OS:
 
     $ VBoxManage controlvm boot2docker-vm natpf1 "aesdk,tcp,127.0.0.1,8080,,8080"
     $ VBoxManage controlvm boot2docker-vm natpf1 "aesdkadmin,tcp,127.0.0.1,8000,,8000"
 
-And you should be ready to go, just follow the rest of the setup guide.
-
 ### Windows
 
-![Tumbleweed](http://media.giphy.com/media/5x89XRx3sBZFC/giphy.gif)
-
-No support yet (although it probably wouldn't take much). Pull requests very
-welcome.
+Not supported yet (we just haven't tried, give it a go, it might work). Pull requests very welcome.
 
 
 ## Getting the scaffold
 ***
 
-Whether you're running with Docker or have installed the Appengine SDK locally,
-the first thing you'll need to do is get the code. This part is easy with
-`git`:
+This part is easy with `git`:
 
     $ git clone https://github.com/rehabstudio/rehabstudio-gae-scaffold.git
 
-Or without `git`:
+You probably want to repoint the git remote `origin` to your own repository:
 
-    $ wget https://github.com/rehabstudio/rehabstudio-gae-scaffold/archive/master.zip
-    $ unzip master.zip
+    $ git remote set-url origin git@github.com:me/my-repo.git
 
 
 ## Using the scaffold
 ***
 
-The easiest way to use this scaffold is with [Docker][docker]. With Docker
-installed, running your application should be as simple as:
+With [Docker][docker] installed, running your application should be as simple
+as:
 
     $ make run
 
