@@ -1,4 +1,4 @@
-"""Test nacelle's session handling
+"""Test scaffold's session handling
 """
 # third-party imports
 import webapp2
