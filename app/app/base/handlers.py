@@ -40,6 +40,7 @@ def requires_auth(f):
     def wrapper(self, *args, **kwargs):
         if not users.get_current_user():
             self.DenyAccess()
+            self.session_store.save_sessions(self.response)
         else:
             return f(self, *args, **kwargs)
     return wrapper
@@ -51,6 +52,7 @@ def requires_admin(f):
     def wrapper(self, *args, **kwargs):
         if not users.is_current_user_admin():
             self.DenyAccess()
+            self.session_store.save_sessions(self.response)
         else:
             return f(self, *args, **kwargs)
     return wrapper
@@ -66,6 +68,7 @@ def xsrf_protected(f):
             return f(self, *args, **kwargs)
         else:
             self.XsrfFail()
+            self.session_store.save_sessions(self.response)
     return wrapper
 
 
