@@ -8,17 +8,18 @@ ADD ops/force_rebuild /force_rebuild
 ENV DEBIAN_FRONTEND noninteractive
 
 # update apt cache, upgrade the system and install the system utils we need
-RUN apt-get update --fix-missing && apt-get upgrade -y
-RUN apt-get install -y apt-transport-https ca-certificates make unzip wget
+RUN apt-get update --fix-missing && \
+    apt-get upgrade -y && \
+    apt-get install -y apt-transport-https
 
 # Add GPG key and repo definition that will allow us to install nodejs
 ADD ops/nodejs/nodesource.list /etc/apt/sources.list.d/nodesource.list
 ADD ops/nodejs/nodesource.gpg.key /tmp/nodesource.gpg.key
-RUN apt-key add /tmp/nodesource.gpg.key
-RUN apt-get update
+RUN apt-key add /tmp/nodesource.gpg.key && \
+    apt-get update
 
 # install packages from apt
-RUN apt-get install -y nodejs python-imaging python-numpy python-pip
+RUN apt-get install -y inotify-tools make nodejs python-imaging python-numpy python-pip sudo unzip wget
 
 # install system-wide packages from PyPI
 ADD ops/requirements.txt /tmp/requirements.txt
@@ -28,8 +29,10 @@ RUN pip install -r /tmp/requirements.txt
 RUN npm install -g grunt-cli gulp
 
 # Download and install the Appengine Python SDK
-RUN cd /opt/ && wget -nv https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.12.zip
-RUN cd /opt/ && unzip -q google_appengine_1.9.12.zip && rm google_appengine_1.9.12.zip
+RUN cd /opt/ && \
+    wget -nv https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.13.zip && \
+    unzip -q google_appengine_1.9.13.zip && \
+    rm google_appengine_1.9.13.zip
 ENV PATH /opt/google_appengine:$PATH
 
 # patch the SDK so we can bind the remote API server to something other than localhost
@@ -48,18 +51,25 @@ VOLUME ["/.ipython"]
 VOLUME ["/home/aeuser"]
 
 # create a non-root user we can use to run the application inside the container
-RUN groupadd -r aeuser -g 1000
-RUN useradd -u 1000 -r -g aeuser -d /home/aeuser -s /bin/bash -c "Docker/GAE image user" aeuser
+RUN groupadd -r aeuser -g 1000 && \
+    useradd -u 1000 -r -g aeuser -d /home/aeuser -s /bin/bash -c "Docker/GAE image user" aeuser
 
 # Add the bootstrap_storage.sh script to the $PATH and make it executable
 ADD ops/scripts/bootstrap_storage.sh /usr/local/bin/bootstrap_storage.sh
 RUN chmod a+x /usr/local/bin/bootstrap_storage.sh
+
+# Add the watch.sh script to the $PATH and make it executable
+ADD ops/scripts/watch.sh /usr/local/bin/watch.sh
+RUN chmod a+x /usr/local/bin/watch.sh
 
 # add .bashrc to ~/
 ADD ops/shell/bashrc /home/aeuser/.bashrc
 
 # add a custom motd to remind users of how persistance works in the container
 ADD ops/shell/motd /etc/motd
+
+# Add custom sudo config to enable root access for aeuser
+ADD ops/shell/sudoers /etc/sudoers.d/aeuser
 
 # switch to the new user account so that all commands run as `aeuser` by default
 ENV HOME /home/aeuser

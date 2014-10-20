@@ -87,6 +87,12 @@ test: storage
 	$(RUN_DOCKER) $(USE_ROOT) $(IMAGE_NAME) make -C /app test
 
 
+# Runs the application's tests continuously, watching for changes in the
+# source files.
+test-watch: storage
+	$(RUN_DOCKER) $(USE_ROOT) $(IMAGE_NAME) make -C /app test-watch
+
+
 # Launches a Bash shell inside the container environment for development
 # purposes
 shell: storage

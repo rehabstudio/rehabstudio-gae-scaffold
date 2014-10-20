@@ -29,3 +29,6 @@ run: clean
 
 test: clean
 	@python tests/run-tests.py
+
+test-watch: clean
+	@watch.sh
