@@ -28,7 +28,7 @@ else ifeq ($(UNAME), Darwin)
 endif
 
 # Base docker run command with common parameters
-RUN_DOCKER = docker run -t -i --rm --volumes-from $(STORAGE_CONTAINER) -v "$(CURDIR)/app:/app" -v "$(CURDIR)/output:/output"
+RUN_DOCKER = docker run -t -i --rm --net host --volumes-from $(STORAGE_CONTAINER) -v "$(CURDIR)/app:/app" -v "$(CURDIR)/output:/output"
 
 
 # Show command line help message

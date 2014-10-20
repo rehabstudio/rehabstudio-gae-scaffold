@@ -93,11 +93,7 @@ def remote_api_shell(servername, appid, path, secure, rpc_server_factory):
 def main():
     """run python shell.
     """
-    # read host IP address from file created at container build time
-    with open('/etc/host_ip', 'r') as f:
-        servername = f.read().strip() + ':8080'
-    # launch the shell
-    remote_api_shell(servername, 'dev~gae-scaffold', '/_ah/remote_api', False, appengine_rpc.HttpRpcServer)
+    remote_api_shell('localhost:8080', 'dev~gae-scaffold', '/_ah/remote_api', False, appengine_rpc.HttpRpcServer)
 
 
 if __name__ == '__main__':
