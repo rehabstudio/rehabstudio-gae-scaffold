@@ -1,6 +1,11 @@
 """Application configuration"""
+# third-party imports
+import webapp2
+from google.appengine.api import users
+
 # local imports
 from .base import constants
+from .base import models
 
 
 # Place global application configuration settings (e.g. settings for
@@ -43,24 +48,40 @@ from .base import constants
 #  served via the /static/ resources.  You may need to change the settings
 #  there as well.
 
+try:
+    session_key = models.GetApplicationConfiguration().session_key
+except AssertionError:
+    # catch assertion error thrown when we import this module during test
+    # runs. normally we'd use the appengine testbed to register the stubs, but
+    # this particular import happens up front and so we haven't initiated the
+    # testbed when it's imported.
+    session_key = 'testingkey'
+
 CONFIG = {
     # Developers are encouraged to build sites that comply with this (or
     # a similarly restrictive) CSP policy.  In particular, adding directives
     # such as unsafe-inline or unsafe-eval is highly discouraged, as these
     # may lead to XSS attacks.
     'csp_policy': {
-        # https://developers.google.com/fonts/docs/technical_considerations
-        'font-src':    '\'self\' themes.googleusercontent.com '
-                       '*.gstatic.com',
-        # Maps, YouTube provide <iframe> based embedding at these URIs.
-        'frame-src':   '\'self\' www.google.com www.youtube.com',
-        # Assorted Google-hosted APIs.
-        'script-src':  '\'self\' *.googleanalytics.com *.google-analytics.com',
-        # In generated code from http://www.google.com/fonts
-        'style-src':   '\'self\' fonts.googleapis.com *.gstatic.com',
-        # Fallback.
-        'default-src': '\'self\' *.gstatic.com',
+        'font-src':    '\'self\'',
+        'frame-src':   '\'self\'',
+        'script-src':  '\'self\'',
+        'style-src':   '\'self\'',
+        'img-src':     '\'self\'',
+        # fallback
+        'default-src': '\'self\'',
         'report-uri':  '/csp',
         'reportOnly': constants.DEBUG,
-    }
+    },
+    # Configure global context/filters/settings for Jinja2
+    'jinja2': {
+        'globals': {
+            'uri_for': webapp2.uri_for,
+            'logout_url': users.create_logout_url,
+        },
+        'filters': {},
+    },
+    'webapp2_extras.sessions': {
+        'secret_key': session_key,
+    },
 }

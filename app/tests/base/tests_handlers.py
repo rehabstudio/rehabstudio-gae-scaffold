@@ -22,6 +22,7 @@ import webapp2
 from google.appengine.ext import testbed
 
 # local imports
+from app import config
 from app.base import handlers
 from app.base import xsrf
 
@@ -77,7 +78,8 @@ class HandlersTest(unittest.TestCase):
     self.app = webapp2.WSGIApplication([('/', DummyHandler),
                                         ('/ajax', DummyAjaxHandler),
                                         ('/cron', DummyCronHandler),
-                                        ('/task', DummyTaskHandler)])
+                                        ('/task', DummyTaskHandler)],
+                                        config=config.CONFIG)
 
   def _FakeLogin(self):
     """Sets up the environment to have a fake user logged in."""

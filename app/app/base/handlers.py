@@ -23,6 +23,7 @@ import webapp2
 # third-party imports
 from google.appengine.api import memcache
 from google.appengine.api import users
+from webapp2_extras import sessions
 
 # local imports
 from . import api_fixer
@@ -208,17 +209,32 @@ class BaseHandler(webapp2.RequestHandler):
     return users.get_current_user()
 
   def dispatch(self):
-    self._SetCommonResponseHeaders()
-    super(BaseHandler, self).dispatch()
+    # Get a session store for this request.
+    self.session_store = sessions.get_store(request=self.request)
+
+    try:
+      self._SetCommonResponseHeaders()
+      super(BaseHandler, self).dispatch()
+    finally:
+      # Save all sessions.
+      self.session_store.save_sessions(self.response)
+
+  @webapp2.cached_property
+  def session(self):
+    # Returns a session using the default cookie key.
+    return self.session_store.get_session()
 
   @webapp2.cached_property
   def jinja2(self):
-    extensions = ['jinja2.ext.with_']
-    env = jinja2.Environment(autoescape=True,
-                             auto_reload=constants.DEBUG,
-                             loader=jinja2.FileSystemLoader(
-                                 constants.TEMPLATE_DIR),
-                             extensions=extensions)
+    extensions = ['jinja2.ext.autoescape', 'jinja2.ext.with_']
+    env = jinja2.Environment(
+        autoescape=True,
+        auto_reload=constants.DEBUG,
+        loader=jinja2.FileSystemLoader(constants.TEMPLATE_DIR),
+        extensions=extensions,
+    )
+    for k, v in self.app.config['jinja2']['filters'].items():
+      env.filters[k] = v
     return env
 
   def render_to_string(self, template_name, template_values=None):
@@ -226,7 +242,22 @@ class BaseHandler(webapp2.RequestHandler):
     if not template_values:
       template_values = {}
 
+    # add xsrf token to the context
     template_values['_xsrf'] = self._xsrf_token
+
+    # add any functions/constants defined in config to the context
+    for k, v in self.app.config['jinja2']['globals'].items():
+      try:
+        template_values[k]
+      except KeyError:
+        template_values[k] = v
+
+    # add common request-specific items to the context
+    template_values['request'] = self.request
+    template_values['session'] = self.session
+    template_values['user'] = users.get_current_user()
+
+    # render and return template as string
     t = self.jinja2.get_template(template_name)
     return t.render(template_values)
 
