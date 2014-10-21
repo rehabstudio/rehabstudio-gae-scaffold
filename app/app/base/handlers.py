@@ -25,6 +25,7 @@ import webapp2
 from google.appengine.api import memcache
 from google.appengine.api import users
 from webapp2_extras import sessions
+from webapp2_extras import sessions_ndb
 
 # local imports
 from . import api_fixer
@@ -240,8 +241,8 @@ class BaseHandler(webapp2.RequestHandler):
 
     @webapp2.cached_property
     def session(self):
-        # Returns a session using the default cookie key.
-        return self.session_store.get_session()
+        # Returns a session using the ndb backend.
+        return self.session_store.get_session(factory=sessions_ndb.DatastoreSessionFactory)
 
     @webapp2.cached_property
     def jinja2(self):
