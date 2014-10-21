@@ -18,6 +18,7 @@ import abc
 import functools
 import jinja2
 import json
+import logging
 import webapp2
 
 # third-party imports
@@ -38,11 +39,14 @@ def requires_auth(f):
     """A decorator that requires a currently logged in user."""
     @functools.wraps(f)
     def wrapper(self, *args, **kwargs):
-        if not users.get_current_user():
-            self.DenyAccess()
-            self.session_store.save_sessions(self.response)
-        else:
-            return f(self, *args, **kwargs)
+        try:
+            if not users.get_current_user():
+                self.DenyAccess()
+                self.session_store.save_sessions(self.response)
+            else:
+                return f(self, *args, **kwargs)
+        except Exception, e:
+            return self.handle_exception(e, self.app.debug)
     return wrapper
 
 
@@ -50,11 +54,14 @@ def requires_admin(f):
     """A decorator that requires a currently logged in administrator."""
     @functools.wraps(f)
     def wrapper(self, *args, **kwargs):
-        if not users.is_current_user_admin():
-            self.DenyAccess()
-            self.session_store.save_sessions(self.response)
-        else:
-            return f(self, *args, **kwargs)
+        try:
+            if not users.is_current_user_admin():
+                self.DenyAccess()
+                self.session_store.save_sessions(self.response)
+            else:
+                return f(self, *args, **kwargs)
+        except Exception, e:
+            return self.handle_exception(e, self.app.debug)
     return wrapper
 
 
@@ -63,12 +70,15 @@ def xsrf_protected(f):
     @functools.wraps(f)
     def wrapper(self, *args, **kwargs):
         non_xsrf_protected_verbs = ['options', 'head', 'get']
-        if (self.request.method.lower() in non_xsrf_protected_verbs or
-                self._RequestContainsValidXsrfToken()):
-            return f(self, *args, **kwargs)
-        else:
-            self.XsrfFail()
-            self.session_store.save_sessions(self.response)
+        try:
+            if (self.request.method.lower() in non_xsrf_protected_verbs or
+                    self._RequestContainsValidXsrfToken()):
+                return f(self, *args, **kwargs)
+            else:
+                self.XsrfFail()
+                self.session_store.save_sessions(self.response)
+        except Exception, e:
+            return self.handle_exception(e, self.app.debug)
     return wrapper
 
 
@@ -338,6 +348,18 @@ class BaseAjaxHandler(BaseHandler):
         if self.request.method.lower() == 'get':
             self._RawWrite(_XSSI_PREFIX)
         self._RawWrite(json.dumps(obj))
+
+    def handle_exception(self, exception, debug):
+        """Ensure a properly formatted JSON error is always returned to the client
+        """
+        if isinstance(exception, webapp2.HTTPException):
+            context = {'error': "%d %s" % (exception.code, exception.title), 'detail': exception.detail}
+            self.response.set_status(exception.code)
+        else:
+            logging.exception(exception)
+            context = {'error': "500 Server Error"}
+            self.response.set_status(500)
+        return self.render_json(context)
 
 
 class AuthenticatedHandler(BaseHandler):
