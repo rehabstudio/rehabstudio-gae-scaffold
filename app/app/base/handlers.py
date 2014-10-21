@@ -220,7 +220,6 @@ class BaseHandler(webapp2.RequestHandler):
 
     def dispatch(self):
         try:
-            self._SetCommonResponseHeaders()
             super(BaseHandler, self).dispatch()
         finally:
             # Save all sessions.
@@ -270,6 +269,7 @@ class BaseHandler(webapp2.RequestHandler):
 
     def render(self, template_name, template_values=None):
         """Renders template_name with template_values and writes to the response."""
+        self._SetCommonResponseHeaders()
         self._RawWrite(self.render_to_string(template_name, template_values))
 
 
@@ -327,15 +327,16 @@ class BaseAjaxHandler(BaseHandler):
             'Content-Type'] = 'application/json; charset=utf-8'
 
     def dispatch(self):
-        self._SetAjaxResponseHeaders()
-        if self.request.method.lower() == 'get':
-            self._RawWrite(_XSSI_PREFIX)
         super(BaseAjaxHandler, self).dispatch()
 
     def render(self, *args, **kwargs):
         raise SecurityError('AJAX handlers must use render_json()')
 
     def render_json(self, obj):
+        self._SetCommonResponseHeaders()
+        self._SetAjaxResponseHeaders()
+        if self.request.method.lower() == 'get':
+            self._RawWrite(_XSSI_PREFIX)
         self._RawWrite(json.dumps(obj))
 
 

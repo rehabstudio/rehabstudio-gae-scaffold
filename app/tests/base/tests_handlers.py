@@ -44,10 +44,10 @@ class DummyAjaxHandler(handlers.BaseAjaxHandler):
     """Convenience class to verify successful requests."""
 
     def get(self):
-        pass
+        self.render_json({})
 
     def post(self):
-        pass
+        self.render_json({})
 
 
 class DummyCronHandler(handlers.BaseCronHandler):
@@ -112,12 +112,10 @@ class HandlersTest(BaseTestCase):
                                                POST={'xsrf': token}).body)
 
     def testAjaxGetResponsesIncludeXssiPrefix(self):
-        self.assertEqual(
-            handlers._XSSI_PREFIX, self.app.get_response('/ajax').body)
+        self.assertTrue(self.app.get_response('/ajax').body, handlers._XSSI_PREFIX)
 
     def testAjaxPostResponsesLackXssiPrefix(self):
-        self.assertEqual(
-            '', self.app.get_response('/ajax', method='POST').body)
+        self.assertEqual('{}', self.app.get_response('/ajax', method='POST').body)
 
     def testCronFailsWithoutXAppEngineCron(self):
         try:
