@@ -43,7 +43,14 @@ class GetHandler(SetHandler):
         self._RawWrite(self.session.get('test', 'no sell :('))
 
 
-wsgi = webapp2.WSGIApplication([('/get', GetHandler), ('/set', SetHandler)], config=config.CONFIG)
+class RaiseHandler(GetHandler):
+
+    def DenyAccess(self):
+        self.session['test'] = 'exc_access_denied'
+        webapp2.abort(401)
+
+
+wsgi = webapp2.WSGIApplication([('/get', GetHandler), ('/set', SetHandler), ('/raise', RaiseHandler)], config=config.CONFIG)
 
 
 class SessionHandlingTests(BaseTestCase):
@@ -95,3 +102,18 @@ class SessionHandlingTests(BaseTestCase):
         response = wsgi.get_response('/get', headers=headers)
         self.assertEqual(200, response.status_int)
         self.assertEqual('xsrf_fail', response.body)
+
+    def test_setting_session_var_and_retrieve_on_next_request_with_exc_during_access_denied(self):
+        """Test persisting a session variable and reading it back when an exception is thrown in DenyAccess
+        """
+
+        response = wsgi.get_response('/raise')
+        self.assertEqual(401, response.status_int)
+
+        headers = [('Cookie', response.headers['Set-Cookie'])]
+
+        self._FakeLogin()
+
+        response = wsgi.get_response('/get', headers=headers)
+        self.assertEqual(200, response.status_int)
+        self.assertEqual('exc_access_denied', response.body)

@@ -39,14 +39,15 @@ def requires_auth(f):
     """A decorator that requires a currently logged in user."""
     @functools.wraps(f)
     def wrapper(self, *args, **kwargs):
-        try:
-            if not users.get_current_user():
+        if not users.get_current_user():
+            try:
                 self.DenyAccess()
+            except Exception, e:
+                self.handle_exception(e, self.app.debug)
+            finally:
                 self.session_store.save_sessions(self.response)
-            else:
-                return f(self, *args, **kwargs)
-        except Exception, e:
-            return self.handle_exception(e, self.app.debug)
+        else:
+            return f(self, *args, **kwargs)
     return wrapper
 
 
@@ -54,14 +55,15 @@ def requires_admin(f):
     """A decorator that requires a currently logged in administrator."""
     @functools.wraps(f)
     def wrapper(self, *args, **kwargs):
-        try:
-            if not users.is_current_user_admin():
+        if not users.is_current_user_admin():
+            try:
                 self.DenyAccess()
+            except Exception, e:
+                self.handle_exception(e, self.app.debug)
+            finally:
                 self.session_store.save_sessions(self.response)
-            else:
-                return f(self, *args, **kwargs)
-        except Exception, e:
-            return self.handle_exception(e, self.app.debug)
+        else:
+            return f(self, *args, **kwargs)
     return wrapper
 
 
@@ -70,15 +72,16 @@ def xsrf_protected(f):
     @functools.wraps(f)
     def wrapper(self, *args, **kwargs):
         non_xsrf_protected_verbs = ['options', 'head', 'get']
-        try:
-            if (self.request.method.lower() in non_xsrf_protected_verbs or
-                    self._RequestContainsValidXsrfToken()):
-                return f(self, *args, **kwargs)
-            else:
+        if (self.request.method.lower() in non_xsrf_protected_verbs or
+                self._RequestContainsValidXsrfToken()):
+            return f(self, *args, **kwargs)
+        else:
+            try:
                 self.XsrfFail()
+            except Exception, e:
+                self.handle_exception(e, self.app.debug)
+            finally:
                 self.session_store.save_sessions(self.response)
-        except Exception, e:
-            return self.handle_exception(e, self.app.debug)
     return wrapper
 
 
@@ -281,6 +284,19 @@ class BaseHandler(webapp2.RequestHandler):
         """Renders template_name with template_values and writes to the response."""
         self._SetCommonResponseHeaders()
         self._RawWrite(self.render_to_string(template_name, template_values))
+
+    def handle_exception(self, exception, debug):
+        """Ensure a properly formatted error is always returned to the client
+        (we don't care about webapp2's pretty error messages, use the console
+        to see tracebacks)
+        """
+        if isinstance(exception, webapp2.HTTPException):
+            self._RawWrite("%d %s" % (exception.code, exception.title))
+            self.response.set_status(exception.code)
+        else:
+            logging.exception(exception)
+            self._RawWrite("500 Server Error")
+            self.response.set_status(500)
 
 
 class BaseCronHandler(BaseHandler):
