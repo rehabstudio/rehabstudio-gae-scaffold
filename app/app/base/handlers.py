@@ -40,7 +40,7 @@ def requires_auth(f):
     """A decorator that requires a currently logged in user."""
     @functools.wraps(f)
     def wrapper(self, *args, **kwargs):
-        if not users.get_current_user():
+        if not self.current_user:
             try:
                 self.DenyAccess()
             except Exception, e:
