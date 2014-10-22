@@ -2,6 +2,9 @@
 # stdlib imports
 import itertools
 
+# third-party imports
+from webapp2 import Route
+
 # local imports
 from . import handlers
 
@@ -9,13 +12,16 @@ from . import handlers
 # These should all inherit from base.handlers.BaseHandler
 _UNAUTHENTICATED_ROUTES = [('/', handlers.RootHandler),
                            ('/xss', handlers.XssHandler),
-                           ('/xssi', handlers.XssiHandler)]
+                           ('/xssi', handlers.XssiHandler),
+                           Route(r'/oauth/start-login/', 'app.oauth.handlers.StartLoginHandler', name='oauth-start-login'),
+                           Route(r'/oauth/handle-callback/', 'app.oauth.handlers.HandleCallbackHandler', name='oauth-handle-callback'),
+                           Route(r'/oauth/logout/', 'app.oauth.handlers.LogoutHandler', name='oauth-logout')]
 
 # These should all inherit from base.handlers.BaseAjaxHandler
 _UNAUTHENTICATED_AJAX_ROUTES = [('/csp', handlers.CspHandler)]
 
 # These should all inherit from base.handlers.AuthenticatedHandler
-_USER_ROUTES = [('/xsrf', handlers.XsrfHandler)]
+_USER_ROUTES = [('/xsrf', handlers.XsrfHandler), ('/oxsrf', handlers.OAuthXsrfHandler)]
 
 # These should all inherit from base.handlers.AuthenticatedAjaxHandler
 _AJAX_ROUTES = []

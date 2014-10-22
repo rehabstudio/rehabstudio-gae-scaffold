@@ -170,6 +170,10 @@ class BaseHandler(webapp2.RequestHandler):
                                          not constants.IS_DEV_APPSERVER)
         api_fixer.ReplaceDefaultArgument(response.set_cookie.im_func, 'httponly',
                                          True)
+
+        # Get a session store for this request.
+        self.session_store = sessions.get_store(request=self.request)
+
         if self.current_user:
             self._xsrf_token = xsrf.GenerateToken(_GetXsrfKey(),
                                                   self.current_user.email())
@@ -182,9 +186,6 @@ class BaseHandler(webapp2.RequestHandler):
             self._xsrf_token = None
         self._RawWrite = self.response.out.write
         self.response.out.write = self._ReplacementWrite
-
-        # Get a session store for this request.
-        self.session_store = sessions.get_store(request=self.request)
 
     # All content should be rendered through a template system to reduce the
     # risk/likelihood of XSS issues.  Access to the original function

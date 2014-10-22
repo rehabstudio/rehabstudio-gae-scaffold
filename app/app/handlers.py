@@ -24,6 +24,8 @@ from google.appengine.api import users
 # local imports
 from .base import constants
 from .base import handlers
+from .oauth import backends
+from .oauth import handlers as oauth_handlers
 
 
 # Example handlers to demonstrate functionality.
@@ -96,6 +98,53 @@ class XsrfHandler(handlers.AuthenticatedHandler):
   def XsrfFail(self):
     counter = self._GetCounter()
     self.render('xsrf.tpl', {'email': self.current_user.email(),
+                             'counter': counter,
+                             'xsrf_fail': True})
+
+
+class OAuthXsrfHandler(oauth_handlers.AuthenticatedHandler):
+
+  def get_backend(self):
+    return backends.get_backend(
+        'google',
+        self.app.config,
+        self.session,
+        self.request
+    )
+
+  def _GetCounter(self):
+    counter = memcache.get('counter')
+    if not counter:
+      counter = 0
+      memcache.set('counter', counter)
+    return counter
+
+  def get(self):
+    if self.get_backend() is None:
+      return self.render('oauth_not_configured.tpl')
+    if not constants.IS_DEV_APPSERVER:
+      self.render('debug_only.tpl')
+      return
+    counter = self._GetCounter()
+    self.render('oxsrf.tpl', {'email': self.current_user.email(),
+                             'counter': counter})
+
+  def post(self):
+    if not constants.IS_DEV_APPSERVER:
+      self.render('debug_only.tpl')
+      return
+    counter = self._GetCounter() + 1
+    memcache.set('counter', counter)
+    self.render('oxsrf.tpl', {'email': self.current_user.email(),
+                             'counter': counter})
+
+  def DenyAccess(self):
+    self.session['next_url'] = self.request.url
+    self.redirect(self.uri_for('oauth-start-login'))
+
+  def XsrfFail(self):
+    counter = self._GetCounter()
+    self.render('oxsrf.tpl', {'email': self.current_user.email(),
                              'counter': counter,
                              'xsrf_fail': True})
 
