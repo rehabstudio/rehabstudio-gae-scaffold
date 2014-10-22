@@ -42,5 +42,5 @@ IS_DEV_APPSERVER = _IsDevAppServer()
 
 DEBUG = IS_DEV_APPSERVER
 
-ROOT_DIR = os.path.join([os.path.dirname(__file__), os.pardir, os.pardir])
-TEMPLATE_DIR = os.path.join([ROOT_DIR, 'templates'])
+ROOT_DIR = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)
+TEMPLATE_DIR = os.path.join(ROOT_DIR, 'templates')
