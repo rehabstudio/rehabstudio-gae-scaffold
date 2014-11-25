@@ -29,10 +29,9 @@ RUN pip install -r /tmp/requirements.txt
 RUN npm install -g grunt-cli gulp
 
 # Download and install the Appengine Python SDK
-RUN cd /opt/ && \
-    wget -nv https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.13.zip && \
-    unzip -q google_appengine_1.9.13.zip && \
-    rm google_appengine_1.9.13.zip
+ADD ops/scripts/gaesdk_download.py /usr/local/bin/gaesdk_download.py
+RUN chmod a+x /usr/local/bin/gaesdk_download.py
+RUN gaesdk_download.py 1.9.15
 ENV PATH /opt/google_appengine:$PATH
 
 # Add the remote_shell.py script to the $PATH and make it executable
