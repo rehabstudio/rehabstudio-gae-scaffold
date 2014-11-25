@@ -1,6 +1,6 @@
 # rehabstudio-gae-scaffold
 
-![CircleCI Build Status](https://circleci.com/gh/rehabstudio/rehabstudio-gae-scaffold.svg?style=shield&circle-token=b2e58e2cb8e9e6e76e09ee39425a880830dc43a5)
+[![CircleCI Build Status](https://circleci.com/gh/rehabstudio/rehabstudio-gae-scaffold.svg?style=shield&circle-token=b2e58e2cb8e9e6e76e09ee39425a880830dc43a5)](https://circleci.com/gh/rehabstudio/rehabstudio-gae-scaffold)
 
 ***
 
