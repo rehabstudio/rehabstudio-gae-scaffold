@@ -1,9 +1,6 @@
 # rehabstudio-gae-scaffold
 
-![Docker](http://www.linux.com/news/galleries/image/docker?format=image&thumbnail=small)
-![Appengine](http://bkarak.wizhut.com/blog/wp-content/uploads/2012/01/app_engine-64.png)
-![Python](http://blog.magiksys.net/sites/default/files/pictures/python-logo-64.png)
-
+![CircleCI Build Status](https://circleci.com/gh/rehabstudio/rehabstudio-gae-scaffold.svg?style=shield&circle-token=b2e58e2cb8e9e6e76e09ee39425a880830dc43a5)
 
 ***
 
