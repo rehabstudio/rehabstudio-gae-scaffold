@@ -2,6 +2,10 @@ machine:
   services:
     - docker
 
+dependencies:
+  override:
+    - docker build -t="gae_scaffold" .
+
 test:
   override:
-    - make test
+    - docker run -t -i -v "`pwd`/app:/app" -v "`pwd`/output:/output" gae_scaffold make -C /app test
