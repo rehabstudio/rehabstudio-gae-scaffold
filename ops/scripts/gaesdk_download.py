@@ -39,6 +39,50 @@ def _print_deprecation_warning(version):
     print()
 
 
+def ensure_directory(path):
+    """Ensure that the parent directory of `path` exists"""
+    dirname = os.path.dirname(path)
+    if not os.path.isdir(dirname):
+        os.makedirs(dirname)
+
+
+def unpack_zipfile(filename, extract_dir, progress_filter=lambda x, y: y):
+    """Unpack zip `filename` to `extract_dir`
+    """
+
+    z = zipfile.ZipFile(filename)
+    try:
+        for info in z.infolist():
+            name = info.filename
+
+            # don't extract absolute paths or ones with .. in them
+            if name.startswith('/') or '..' in name:
+                continue
+
+            target = os.path.join(extract_dir, *name.split('/'))
+            target = progress_filter(name, target)
+            if not target:
+                continue
+            if name.endswith('/'):
+                # directory
+                ensure_directory(target)
+            else:
+                # file
+                ensure_directory(target)
+                data = z.read(info.filename)
+                f = open(target, 'wb')
+                try:
+                    f.write(data)
+                finally:
+                    f.close()
+                    del data
+            unix_attributes = info.external_attr >> 16
+            if unix_attributes:
+                os.chmod(target, unix_attributes)
+    finally:
+        z.close()
+
+
 def download_sdk(version):
     """Downloads the GAE SDK.
     """
@@ -56,7 +100,7 @@ def download_sdk(version):
     with open(zip_path, 'w') as f:
         f.write(response.read())
 
-    zipfile.ZipFile(zip_path).extractall('/opt/')
+    unpack_zipfile(zip_path, '/opt/')
 
 
 if __name__ == '__main__':
