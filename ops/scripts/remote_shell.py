@@ -85,7 +85,7 @@ def remote_api_shell(servername, appid, path, secure, rpc_server_factory):
     os.environ['SERVER_SOFTWARE'] = 'Development (remote_api_shell)/1.0'
 
     # ensure our app is on the python path
-    sys.path.insert(0, '/app')
+    sys.path.insert(0, '/src')
     # run an embedded IPython shell in the current context
     IPython.embed(header=BANNER)
 

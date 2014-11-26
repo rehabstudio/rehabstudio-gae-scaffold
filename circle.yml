@@ -8,7 +8,7 @@ dependencies:
 
 test:
   override:
-    - docker run -t -i -v "`pwd`/app:/app" -v "`pwd`/output:/output" gae_scaffold make -C /app test
+    - docker run -t -i -v "`pwd`/src:/src" -v "`pwd`/output:/output" gae_scaffold make -C /src test
 
 general:
   artifacts:

@@ -97,8 +97,8 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
 
-# make sure the shell opens in the /app dir with all of our code
-cd /app
+# make sure the shell opens in the /src dir with all of our code
+cd /src
 
 # clear the screen (because it'll be full of docker build logs) and display
 # our custom motd

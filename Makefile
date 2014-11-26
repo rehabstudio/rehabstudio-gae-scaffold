@@ -28,7 +28,7 @@ else ifeq ($(UNAME), Darwin)
 endif
 
 # Base docker run command with common parameters
-RUN_DOCKER = docker run -t -i --rm --net host --volumes-from $(STORAGE_CONTAINER) -v "$(CURDIR)/app:/app" -v "$(CURDIR)/output:/output"
+RUN_DOCKER = docker run -t -i --rm --net host --volumes-from $(STORAGE_CONTAINER) -v "$(CURDIR)/src:/src" -v "$(CURDIR)/output:/output"
 
 
 # Show command line help message
@@ -69,7 +69,7 @@ dirtycheck:
 #     app=<app_name>:       application id to deploy to e.g. `app=someapp` would deploy to someapp.appspot.com
 #     version=<version_id>: sub-version that should be used for deployment
 deploy: dirtycheck storage
-	$(RUN_DOCKER) $(USE_ROOT) $(IMAGE_NAME) make -C /app deploy app=$(app) version=$(version)
+	$(RUN_DOCKER) $(USE_ROOT) $(IMAGE_NAME) make -C /src deploy app=$(app) version=$(version)
 
 # Runs the application locally using the Appengine SDK. Your application code
 # is mounted inside the docker container and the appropriate ports are bound
@@ -77,20 +77,20 @@ deploy: dirtycheck storage
 # server just as you usually would at http://localhost:8080 and the admin
 # server on http://localhost:8000
 run: storage
-	$(RUN_DOCKER) -p 0.0.0.0:8080:8080 -p 0.0.0.0:8000:8000 --name gaerun-$(CID) $(USE_ROOT) $(IMAGE_NAME) make -C /app run
+	$(RUN_DOCKER) -p 0.0.0.0:8080:8080 -p 0.0.0.0:8000:8000 --name gaerun-$(CID) $(USE_ROOT) $(IMAGE_NAME) make -C /src run
 
 # Runs the application's tests using the appropriate test runners for each
 # part of the application. All artifacts produced are saved to the `output/`
 # directory on the host so they can be accessed outside the container e.g. by
 # Jenkins.
 test: storage
-	$(RUN_DOCKER) $(USE_ROOT) $(IMAGE_NAME) make -C /app test
+	$(RUN_DOCKER) $(USE_ROOT) $(IMAGE_NAME) make -C /src test
 
 
 # Runs the application's tests continuously, watching for changes in the
 # source files.
 test-watch: storage
-	$(RUN_DOCKER) $(USE_ROOT) $(IMAGE_NAME) make -C /app test-watch
+	$(RUN_DOCKER) $(USE_ROOT) $(IMAGE_NAME) make -C /src test-watch
 
 
 # Launches a Bash shell inside the container environment for development
