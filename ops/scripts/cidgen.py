@@ -11,7 +11,7 @@ import sys
 
 
 def main():
-    _path = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'output', '.cid')
+    _path = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, '.cid')
     if not os.path.exists(_path):
         with open(_path, 'w') as f:
             f.write(str(uuid.uuid4()))
