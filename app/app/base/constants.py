@@ -18,7 +18,7 @@ import os
 
 
 def _IsDevAppServer():
-    return os.environ.get('SERVER_SOFTWARE', '').startswith('Development')
+    return os.environ.get('SERVER_SOFTWARE', 'Development').startswith('Development')
 
 # webapp2 application configuration constants.
 

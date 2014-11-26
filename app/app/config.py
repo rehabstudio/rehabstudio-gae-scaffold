@@ -48,14 +48,16 @@ from .base import models
 #  served via the /static/ resources.  You may need to change the settings
 #  there as well.
 
-try:
-    session_key = models.GetApplicationConfiguration().session_key
-except AssertionError:
-    # catch assertion error thrown when we import this module during test
-    # runs. normally we'd use the appengine testbed to register the stubs, but
-    # this particular import happens up front and so we haven't initiated the
-    # testbed when it's imported.
+# we use a static key when testing or running under the development server.
+# Ideally we'd use the same method locally as when in production, but
+# attempting to get the key from the datastore is problematic when running
+# under nose (as it tries to use the datastore before the testbed is
+# initialised).
+if constants.IS_DEV_APPSERVER:
     session_key = 'testingkey'
+else:
+    session_key = models.GetApplicationConfiguration().session_key
+
 
 CONFIG = {
     # Developers are encouraged to build sites that comply with this (or
