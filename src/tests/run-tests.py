@@ -61,9 +61,9 @@ if __name__ == '__main__':
         '--cover-erase',
         '--cover-package=app',
         '--cover-xml',
-        '--cover-xml-file=/output/coverage.xml',
+        '--cover-xml-file=/home/aeuser/coverage.xml',
         '--with-xunit',
-        '--xunit-file=/output/nosetests.xml',
+        '--xunit-file=/home/aeuser/nosetests.xml',
         '--with-yanc',
         '--logging-level=INFO'
     ])

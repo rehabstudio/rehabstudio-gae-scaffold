@@ -1,6 +1,4 @@
 *.py[co]
 .cid
-output/coverage.xml
-output/nosetests.xml
 src/.coverage
 node_modules/

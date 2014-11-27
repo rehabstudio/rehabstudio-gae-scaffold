@@ -28,7 +28,7 @@ else ifeq ($(UNAME), Darwin)
 endif
 
 # Base docker run command with common parameters
-RUN_DOCKER = docker run -t -i --rm --net host --volumes-from $(STORAGE_CONTAINER) -v "$(CURDIR)/src:/src" -v "$(CURDIR)/output:/output"
+RUN_DOCKER = docker run -t -i --rm --net host --volumes-from $(STORAGE_CONTAINER) -v "$(CURDIR)/src:/src"
 
 
 # Show command line help message
@@ -80,11 +80,17 @@ run: storage
 	$(RUN_DOCKER) -p 0.0.0.0:8080:8080 -p 0.0.0.0:8000:8000 --name gaerun-$(CID) $(USE_ROOT) $(IMAGE_NAME) make -C /src run
 
 # Runs the application's tests using the appropriate test runners for each
-# part of the application. All artifacts produced are saved to the `output/`
-# directory on the host so they can be accessed outside the container e.g. by
-# Jenkins.
+# part of the application. All artifacts produced are copied to the host
+# filesystem after the test run so they can be accessed outside the container
+# e.g. by Jenkins.
 test: storage
 	$(RUN_DOCKER) $(USE_ROOT) $(IMAGE_NAME) make -C /src test
+
+# launch a temporary busybox container with the volumes from our storage
+# container and copy the test artifacts out to the host filesystem
+extract-artifacts:
+	docker cp $(STORAGE_CONTAINER):/home/aeuser/coverage.xml "$(CURDIR)/coverage.xml"
+	docker cp $(STORAGE_CONTAINER):/home/aeuser/nosetests.xml "$(CURDIR)/nosetests.xml"
 
 
 # Runs the application's tests continuously, watching for changes in the
