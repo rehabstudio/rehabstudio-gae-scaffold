@@ -4,7 +4,7 @@ MAINTAINER Paddy Carey <patrick@rehabstudio.com>
 # update apt cache, upgrade the system and install the system utils we need
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y apt-transport-https
+    apt-get install -y apt-transport-https inotify-tools make python-imaging python-numpy python-pip sudo
 
 # copy all necessary assets and scripts into the container, put them in the
 # right places and ensure the correct permissions are set.
@@ -16,7 +16,7 @@ RUN bash /ops/install_assets_and_scripts.sh
 RUN apt-key add /ops/assets/nodesource.gpg.key && apt-get update
 
 # install all the packages we need from apt, pypi and npm
-RUN apt-get install -y inotify-tools make nodejs python-imaging python-numpy python-pip sudo && \
+RUN apt-get install -y nodejs && \
     pip install -r /ops/assets/requirements.txt && \
     npm install -g grunt-cli gulp
 
