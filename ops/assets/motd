@@ -5,7 +5,8 @@ gae-scaffold docker shell
 Remember: changes you make here will not be persisted except for those changes
 made to the following directories:
 
-    - /src (host)
+    - /src-client (host)
+    - /src-server (host)
     - /.appengine_storage/ (storage container)
     - /.ipython/ (storage container)
     - /home/aeuser/ (storage container)

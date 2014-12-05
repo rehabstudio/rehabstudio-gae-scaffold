@@ -171,7 +171,18 @@ and all SDK modules importable), use:
 **Note:** When you want to run the python shell you must have already started
 `make run` in another shell so we can access the remote API.
 
-Check out the `Makefile` in the repository root for all available commands.
+
+### Building frontend code
+
+The `src-server/static/` folder should be empty in git, if you need to run the
+app locally or deploy to a new server, you need to first use the included
+tools to build the application. To build the frontend/client application, use:
+
+    $ make client-build
+
+You can also use gulp-watch to trigger rebuilds automatically using:
+
+    $ make client-watch
 
 
 ### Installing Libraries

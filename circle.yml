@@ -8,4 +8,4 @@ dependencies:
 
 test:
   override:
-    - docker run -t -i -v "`pwd`/src:/src" -u 0 gae_scaffold make -C /src test
+    - docker run -t -i -v "`pwd`/src-server:/src-server" -u 0 gae_scaffold make -C /src-server test

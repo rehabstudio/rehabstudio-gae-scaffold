@@ -1,0 +1,10 @@
+{
+  "name": "rehabstudio-gae-scaffold",
+  "version": "0.1.0",
+  "description": "A project skeleton.",
+  "devDependencies": {
+    "gulp": "^3.8.10",
+    "gulp-watch": "^3.0.0"
+  },
+  "dependencies": {}
+}

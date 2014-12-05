@@ -67,5 +67,4 @@ if __name__ == '__main__':
         '--with-yanc',
         '--logging-level=INFO'
     ])
-    os.remove('/src/.coverage')
     sys.exit(int(not res))

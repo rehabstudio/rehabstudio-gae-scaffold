@@ -23,12 +23,14 @@ endif
 UNAME := $(shell uname)
 ifeq ($(UNAME), Linux)
 	USE_ROOT =
+	USE_MTIME =
 else ifeq ($(UNAME), Darwin)
 	USE_ROOT = -u 0
+	USE_MTIME = --use_mtime_file_watcher
 endif
 
 # Base docker run command with common parameters
-RUN_DOCKER = docker run -t -i --rm --net host --volumes-from $(STORAGE_CONTAINER) -v "$(CURDIR)/src:/src"
+RUN_DOCKER = docker run -t -i --rm --net host --volumes-from $(STORAGE_CONTAINER) -v "$(CURDIR)/src-server:/src-server" -v "$(CURDIR)/src-client:/src-client"
 
 
 # Show command line help message
@@ -68,8 +70,8 @@ dirtycheck:
 #
 #     app=<app_name>:       application id to deploy to e.g. `app=someapp` would deploy to someapp.appspot.com
 #     version=<version_id>: sub-version that should be used for deployment
-deploy: dirtycheck storage
-	$(RUN_DOCKER) $(USE_ROOT) $(IMAGE_NAME) make -C /src deploy app=$(app) version=$(version)
+deploy: dirtycheck storage client-build
+	$(RUN_DOCKER) $(USE_ROOT) $(IMAGE_NAME) make -C /src-server deploy app=$(app) version=$(version)
 
 # Runs the application locally using the Appengine SDK. Your application code
 # is mounted inside the docker container and the appropriate ports are bound
@@ -77,14 +79,14 @@ deploy: dirtycheck storage
 # server just as you usually would at http://localhost:8080 and the admin
 # server on http://localhost:8000
 run: storage
-	$(RUN_DOCKER) -p 0.0.0.0:8080:8080 -p 0.0.0.0:8000:8000 --name gaerun-$(CID) $(USE_ROOT) $(IMAGE_NAME) make -C /src run
+	$(RUN_DOCKER) -p 0.0.0.0:8080:8080 -p 0.0.0.0:8000:8000 --name gaerun-$(CID) $(USE_ROOT) $(IMAGE_NAME) make -C /src-server run mtime=$(USE_MTIME)
 
 # Runs the application's tests using the appropriate test runners for each
 # part of the application. All artifacts produced are copied to the host
 # filesystem after the test run so they can be accessed outside the container
 # e.g. by Jenkins.
 test: storage
-	$(RUN_DOCKER) $(USE_ROOT) $(IMAGE_NAME) make -C /src test
+	$(RUN_DOCKER) $(USE_ROOT) $(IMAGE_NAME) make -C /src-server test
 
 # launch a temporary busybox container with the volumes from our storage
 # container and copy the test artifacts out to the host filesystem
@@ -96,7 +98,7 @@ extract-artifacts:
 # Runs the application's tests continuously, watching for changes in the
 # source files.
 test-watch: storage
-	$(RUN_DOCKER) $(USE_ROOT) $(IMAGE_NAME) make -C /src test-watch
+	$(RUN_DOCKER) $(USE_ROOT) $(IMAGE_NAME) make -C /src-server test-watch
 
 
 # Launches a Bash shell inside the container environment for development
@@ -116,3 +118,11 @@ pyshell: storage
 # shutdown, which it *loves* to do).
 force-stop:
 	docker stop gaerun-$(CID)
+
+# Build FE/client code inside the container
+client-build: storage
+	$(RUN_DOCKER) $(USE_ROOT) $(IMAGE_NAME) make -C /src-client build
+
+# watch client src dir for changes and rebuild as required
+client-watch: storage
+	$(RUN_DOCKER) $(USE_ROOT) $(IMAGE_NAME) make -C /src-client watch
