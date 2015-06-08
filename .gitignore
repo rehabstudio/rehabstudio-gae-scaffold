@@ -1,4 +1,4 @@
 *.py[co]
 .cid
-src/.coverage
+*.coverage
 node_modules/
