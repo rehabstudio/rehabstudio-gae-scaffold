@@ -21,7 +21,7 @@ RUN apt-get install -y nodejs && \
     npm install -g grunt-cli gulp
 
 # Download and install the Appengine Python SDK
-RUN python /ops/scripts/gaesdk_download.py 1.9.15
+RUN python /ops/scripts/gaesdk_download.py 1.9.21
 ENV PATH /opt/google_appengine:$PATH
 
 # use volumes to persist application data across container restarts
