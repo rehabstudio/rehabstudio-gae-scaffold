@@ -14,22 +14,22 @@ clean:
 
 deploy: clean
 	# deploy application to the default environment
-	appcfg.py update .                                                  \
-		--oauth2                                                        \
-		--oauth2_credential_file=/.appengine_storage/deploy_credentials \
-		--noauth_local_webserver                                        \
-		-A $(app)                                                       \
-		-V $(version)                                                   \
+	appcfg.py update . \
+		--oauth2 \
+		--oauth2_credential_file=/home/aeuser/creds/deploy_credentials \
+		--noauth_local_webserver \
+		-A $(app) \
+		-V $(version)
 
 run: clean
 	# run the appengine development server
-	dev_appserver.py .                            \
-		--host 0.0.0.0                            \
-		--admin_host 0.0.0.0                      \
+	 dev_appserver.py . \
+		--host 0.0.0.0 \
+		--admin_host 0.0.0.0 \
 		--datastore_consistency_policy consistent \
-		--require_indexes                         \
-		--storage_path /.appengine_storage/       \
-		--skip_sdk_update_check                   \
+		--require_indexes \
+		--storage_path /home/aeuser/ \
+		--skip_sdk_update_check \
 		$(mtime)
 
 test: clean
