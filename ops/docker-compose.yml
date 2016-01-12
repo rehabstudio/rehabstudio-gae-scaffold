@@ -12,8 +12,9 @@ gaescaffoldserver:
     - 8000:8000
 
 gaescaffoldclient:
-  image: rehabstudio/polymer-dev
+  build: src/client
   command: make watch
   volumes:
-    - ../src/client:/src
-    - ../src/server:/server
+    - ./src/client:/src
+    - ./src/server:/server
+    - /src/node_modules
