@@ -1,0 +1,19 @@
+gaescaffoldserver:
+  image: rehabstudio/appengine-dev
+  command: make -C /app run
+  user: root
+  working_dir: /app
+  volumes:
+    - ../src/server:/app
+    - /home/aeuser
+    - ../ops:/home/aeuser/creds
+  ports:
+    - 0.0.0.0:8080:8080
+    - 8000:8000
+
+gaescaffoldclient:
+  image: rehabstudio/polymer-dev
+  command: make watch
+  volumes:
+    - ../src/client:/src
+    - ../src/server:/server
