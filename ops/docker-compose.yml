@@ -12,7 +12,7 @@ gaescaffoldserver:
     - 8000:8000
 
 gaescaffoldclient:
-  image: node:5.0.0
+  image: node:5.4
   command: make watch
   working_dir: /src
   volumes:
