@@ -1,11 +1,8 @@
 bootstrap:
 	npm install
 
-build: bootstrap
-	gulp
-
-watch: bootstrap
-	gulp watch
+build watch: bootstrap
+	npm run $@;
 
 test:
 	@echo "Nothing to test."

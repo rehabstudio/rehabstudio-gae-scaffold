@@ -12,9 +12,10 @@ gaescaffoldserver:
     - 8000:8000
 
 gaescaffoldclient:
-  build: src/client
+  image: node:5.0.0
   command: make watch
+  working_dir: /src
   volumes:
-    - ./src/client:/src
-    - ./src/server:/server
+    - ../src/client:/src
+    - ../src/server:/server
     - /src/node_modules
