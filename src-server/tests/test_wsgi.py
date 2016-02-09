@@ -14,6 +14,7 @@
 """Tests for main."""
 
 import webapp2
+from webapp2 import import_string
 from webapp2_extras.routes import MultiRoute
 
 from app import routes
@@ -35,6 +36,10 @@ class MainTest(BaseTestCase):
             if issubclass(route.__class__, MultiRoute):
                 self._VerifyInheritance(list(route.get_routes()), base_class)
                 continue
+
+            # If the handler is in string from, request the the expected object
+            if isinstance(route.handler, basestring):
+                route.handler = import_string(route.handler)
 
             if issubclass(route.handler, webapp2.RedirectHandler):
                 continue
@@ -77,6 +82,10 @@ class MainTest(BaseTestCase):
             if issubclass(route.__class__, MultiRoute):
                 route_list += list(route.get_routes())
                 continue
+
+            # If the handler is in string from, request the the expected object
+            if isinstance(route.handler, basestring):
+                route.handler = import_string(route.handler)
 
             if issubclass(route.handler, webapp2.RedirectHandler):
                 continue
