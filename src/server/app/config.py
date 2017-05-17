@@ -91,6 +91,11 @@ CONFIG = {
             'uri_for': webapp2.uri_for,
             'logout_url': users.create_logout_url,
         },
+        'environment_args': {
+            'autoescape': True,
+            'extensions': ['jinja2.ext.with_'],
+            'auto_reload': constants.DEBUG
+        },
         'filters': {},
     },
     'webapp2_extras.sessions': {

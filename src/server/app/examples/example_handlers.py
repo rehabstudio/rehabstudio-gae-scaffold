@@ -17,12 +17,14 @@ from google.appengine.api import users
 from ..base import constants
 from ..base import handlers
 
+from ..config import CONFIG
+
 
 class JinjaXssHandler(handlers.BaseHandler):
 
   def get(self):
     # Test for jinja extension
-    extensions = self.get_jinja2_config()['environment_args']['extensions']
+    extensions = CONFIG['jinja2']['environment_args']['extensions']
     autoescape_ext = 'jinja2.ext.autoescape' in extensions
 
     if not constants.IS_DEV_APPSERVER:
@@ -94,7 +96,7 @@ class CspHandler(handlers.BaseHandler):
 
   def get(self):
     # Test for jinja extension
-    extensions = self.get_jinja2_config()['environment_args']['extensions']
+    extensions = CONFIG['jinja2']['environment_args']['extensions']
     autoescape_ext = 'jinja2.ext.autoescape' in extensions
 
     if not constants.IS_DEV_APPSERVER:
