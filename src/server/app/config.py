@@ -67,7 +67,15 @@ CONFIG = {
     'csp_policy': {
         'font-src':    '\'self\'',
         'frame-src':   '\'self\'',
-        'script-src':  '\'self\'',
+        'script-src': ' '.join([
+            constants.CSP_NONCE_PLACEHOLDER_FORMAT,
+            # Propagate trust to dynamically created scripts.
+            '\'strict-dynamic\' ',
+            # Fallback. Ignored in presence of a nonce
+            '\'unsafe-inline\' ',
+            # Fallback. Ignored in presence of strict-dynamic.
+            'https: http:'
+        ]),
         'style-src':   '\'self\'',
         'img-src':     '\'self\'',
         # fallback

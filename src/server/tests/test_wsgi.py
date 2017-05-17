@@ -23,12 +23,10 @@ from tests.testcases import BaseTestCase
 
 
 class MainTest(BaseTestCase):
-
     """Test cases for main."""
 
     def _VerifyInheritance(self, routes_list, base_class):
         """Checks that the handlers of the given routes inherit from base_class."""
-
         router = webapp2.Router(routes_list)
         route_list = router.match_routes + router.build_routes.values()
         inheritance_errors = ''

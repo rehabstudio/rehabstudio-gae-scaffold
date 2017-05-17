@@ -15,10 +15,12 @@
 """
 # stdlib imports
 import abc
+import base64
 import functools
 import jinja2
 import json
 import logging
+import os
 import webapp2
 
 # third-party imports
@@ -68,7 +70,7 @@ def requires_admin(f):
 
 
 def xsrf_protected(f):
-    """Decorator to validate XSRF tokens for any verb but GET, HEAD, OPTIONS."""
+    """Decorator to validate XSRF token for any verb but GET, HEAD, OPTIONS."""
     @functools.wraps(f)
     def wrapper(self, *args, **kwargs):
         non_xsrf_protected_verbs = ['options', 'head', 'get']
@@ -87,7 +89,7 @@ def xsrf_protected(f):
 
 # Utility functions.
 def _GetXsrfKey():
-    """Returns the current key for generating and verifying XSRF tokens."""
+    """Return the current key for generating and verifying XSRF tokens."""
     client = memcache.Client()
     xsrf_key = client.get('xsrf_key')
     if not xsrf_key:
@@ -95,6 +97,12 @@ def _GetXsrfKey():
         xsrf_key = config.xsrf_key
         client.set('xsrf_key', xsrf_key)
     return xsrf_key
+
+
+def _GetCspNonce():
+    """Return a random CSP nonce."""
+    nonce_length = constants.NONCE_LENGTH
+    return base64.b64encode(os.urandom(nonce_length * 2))[:nonce_length]
 
 
 # Classes with a __metaclass__ of _HandlerMeta may not contain any methods
@@ -175,10 +183,13 @@ class BaseHandler(webapp2.RequestHandler):
             if self.app.config.get('using_angular', constants.DEFAULT_ANGULAR):
                 # AngularJS requires a JS readable XSRF-TOKEN cookie and will pass this
                 # back in AJAX requests.
-                self.response.set_cookie(
+                self.response.set_cookie(1
                     'XSRF-TOKEN', self._xsrf_token, httponly=False)
         else:
             self._xsrf_token = None
+
+        self.csp_nonce = _GetCspNonce()
+
         self._RawWrite = self.response.out.write
         self.response.out.write = self._ReplacementWrite
 
@@ -225,13 +236,19 @@ class BaseHandler(webapp2.RequestHandler):
         policies = []
         for (k, v) in csp_policy.iteritems():
             policies.append('%s %s' % (k, v))
-        self.response.headers.add(header_name, '; '.join(policies))
+        csp = '; '.join(policies)
+
+        # Set random nonce per response
+        csp = csp % {'nonce_value': self.csp_nonce}
+
+        self.response.headers.add(header_name, csp)
 
     @webapp2.cached_property
     def current_user(self):
         return users.get_current_user()
 
     def dispatch(self):
+        self._SetCommonResponseHeaders()
         try:
             super(BaseHandler, self).dispatch()
         finally:
@@ -282,7 +299,6 @@ class BaseHandler(webapp2.RequestHandler):
 
     def render(self, template_name, template_values=None):
         """Renders template_name with template_values and writes to the response."""
-        self._SetCommonResponseHeaders()
         self._RawWrite(self.render_to_string(template_name, template_values))
 
     def handle_exception(self, exception, debug):
@@ -353,16 +369,15 @@ class BaseAjaxHandler(BaseHandler):
             'Content-Type'] = 'application/json; charset=utf-8'
 
     def dispatch(self):
+        self._SetAjaxResponseHeaders()
+        if self.request.method.lower() == 'get':
+            self._RawWrite(_XSSI_PREFIX)
         super(BaseAjaxHandler, self).dispatch()
 
     def render(self, *args, **kwargs):
         raise SecurityError('AJAX handlers must use render_json()')
 
     def render_json(self, obj):
-        self._SetCommonResponseHeaders()
-        self._SetAjaxResponseHeaders()
-        if self.request.method.lower() == 'get':
-            self._RawWrite(_XSSI_PREFIX)
         self._RawWrite(json.dumps(obj))
 
     def handle_exception(self, exception, debug):
