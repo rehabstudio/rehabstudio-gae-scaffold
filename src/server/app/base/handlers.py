@@ -183,7 +183,7 @@ class BaseHandler(webapp2.RequestHandler):
             if self.app.config.get('using_angular', constants.DEFAULT_ANGULAR):
                 # AngularJS requires a JS readable XSRF-TOKEN cookie and will pass this
                 # back in AJAX requests.
-                self.response.set_cookie(1
+                self.response.set_cookie(
                     'XSRF-TOKEN', self._xsrf_token, httponly=False)
         else:
             self._xsrf_token = None

@@ -17,18 +17,11 @@
 import json
 import logging
 
-<<<<<<< HEAD:src/server/app/handlers.py
 # third-party imports
-from google.appengine.api import memcache  # For XsrfHandler.  Remove if unused.
-from google.appengine.api import users
 
 # local imports
-from .base import constants
 from .base import handlers
 
-=======
-from base import handlers
->>>>>>> 064e07bb8176fe028f332e1c9d3344fa7d0487fa:src/handlers.py
 
 # Minimal set of handlers to let you display main page with examples
 class RootHandler(handlers.BaseHandler):
@@ -40,8 +33,8 @@ class CspHandler(handlers.BaseAjaxHandler):
 
   def post(self):
     try:
-      report = json.loads(self.request.body)
-      logging.warn('CSP Violation: %s' % (json.dumps(report['csp-report'])))
-      self.render_json({})
+        report = json.loads(self.request.body)
+        logging.warn('CSP Violation: %s' % (json.dumps(report['csp-report'])))
+        self.render_json({})
     except:
-      self.render_json({'error': 'invalid CSP report'})
+        self.render_json({'error': 'invalid CSP report'})

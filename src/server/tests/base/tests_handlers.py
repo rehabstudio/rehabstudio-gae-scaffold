@@ -106,15 +106,19 @@ class HandlersTest(BaseTestCase):
 
         key = handlers._GetXsrfKey()
         token = xsrf.GenerateToken(key, 'user@example.com')
-        self.assertEqual('post_succeeded',
-                         self.app.get_response('/',
-                                               method='POST',
-                                               POST={'xsrf': token}).body)
+        response = self.app.get_response(
+            '/',
+            method='POST',
+            POST={'xsrf': token}
+        )
+        self.assertEqual('post_succeeded', response.body)
 
     def testResponseHasStrictCSP(self):
         """Checks that the CSP in the response is set and strict.
         More information: https://www.w3.org/TR/CSP3/#strict-dynamic-usage
         """
+        self._FakeLogin()
+
         fakeNonce = 'rand0m123'
         strictBaseUri = ['\'self\'']
         strictScriptSrc = ['\'strict-dynamic\'', '\'nonce-%s\'' % fakeNonce]

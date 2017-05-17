@@ -65,6 +65,7 @@ CONFIG = {
     # such as unsafe-inline or unsafe-eval is highly discouraged, as these
     # may lead to XSS attacks.
     'csp_policy': {
+        'base-uri': '\'self\'',
         'font-src':    '\'self\'',
         'frame-src':   '\'self\'',
         'script-src': ' '.join([
@@ -78,6 +79,7 @@ CONFIG = {
         ]),
         'style-src':   '\'self\'',
         'img-src':     '\'self\'',
+        'object-src': '\'none\'',
         # fallback
         'default-src': '\'self\'',
         'report-uri':  '/csp',

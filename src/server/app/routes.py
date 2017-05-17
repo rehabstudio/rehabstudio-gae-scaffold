@@ -10,8 +10,6 @@ from .examples import example_handlers
 # These should all inherit from base.handlers.BaseHandler
 _UNAUTHENTICATED_ROUTES = [('/', handlers.RootHandler),
                            ('/examples/xss',
-                            example_handlers.ClosureXssHandler),
-                           ('/examples/jinja',
                             example_handlers.JinjaXssHandler),
                            ('/examples/csp', example_handlers.CspHandler),
                            ('/examples/xssi', example_handlers.XssiHandler)]
