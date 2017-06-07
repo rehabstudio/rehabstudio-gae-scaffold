@@ -9,4 +9,4 @@ test:
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/;
     - cp ./build/tests.xml $CIRCLE_TEST_REPORTS/junit/;
     - mkdir -p $CIRCLE_ARTIFACTS/python/;
-    - cp ./build/coverage.xml $CIRCLE_ARTIFACTS/python/;
+    - cp -r ./build/coverage $CIRCLE_ARTIFACTS/;
