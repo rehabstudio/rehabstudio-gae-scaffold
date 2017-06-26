@@ -99,13 +99,38 @@ matures.
 **NOTE:** The minimum required version of docker is 1.3. Docker/boot2docker
 1.3.0 added support for mounted volumes when using boot2docker on OSX.
 
+<<<<<<< HEAD
 ### Linux
 
 Docker is best supported on Linux, you can probably find packages for your
 preferred distribution [here][docker_install].
+=======
+## Dependency Setup
+----
+From the root of the repository:
+
+1.  `git submodule init`
+1.  `git submodule update`
+1.  `cd closure-compiler` - refer to closure-compiler/README.md on how to build
+       the compiler.  Feel free to use this GWT-skipping variant:
+       `mvn -pl externs/pom.xml,pom-main.xml,pom-main-shaded.xml`
+1.  `cd ../closure-templates && mvn && cd ..`
+1.  `npm install`
+1.  `mkdir $HOME/bin; cd $HOME/bin`
+1.  `npm install grunt-cli`
+    * Alternatively, `sudo npm install -g grunt-cli` will install system-wide
+      and you may skip the next step.
+1.  `export PATH=$HOME/bin/node_modules/grunt-cli/bin:$PATH`
+    * It is advisable to add this to login profile scripts (.bashrc, etc.).
+1.  Visit <https://cloud.google.com/appengine/docs/python/download>, and choose
+    the alternative option to "download the original App Engine SDK for Python."
+    Choose the "Linux" platform (even if you use OS X).  Unzip the file, such
+    that $HOME/bin/google_appengine/ is populated with the contents of the .zip.
+>>>>>>> 064e07bb8176fe028f332e1c9d3344fa7d0487fa
 
 ### OSX
 
+<<<<<<< HEAD
 Install Docker and boot2docker following the instructions on
 [this page][docker_osx_install].
 
@@ -120,6 +145,10 @@ appengine development server directly from the host OS:
 
 Not supported yet (we just haven't tried, give it a go, it might work). Pull requests very welcome.
 
+=======
+## Scaffold Development
+----
+>>>>>>> 064e07bb8176fe028f332e1c9d3344fa7d0487fa
 
 ## Getting the scaffold
 ***
@@ -130,6 +159,7 @@ This part is easy with `git`:
 
 You probably want to repoint the git remote `origin` to your own repository:
 
+<<<<<<< HEAD
     $ git remote set-url origin git@github.com:me/my-repo.git
 
 
@@ -138,6 +168,15 @@ You probably want to repoint the git remote `origin` to your own repository:
 
 With [Docker][docker] installed, running your application should be as simple
 as:
+=======
+Note that the development appserver will be running on a snapshot of code
+at the time you run it.  If you make changes, you can run the various Grunt
+tasks in order to propagate them to the local appserver.  For instance,
+`grunt copy` will refresh the source code (local and third party), static files,
+and templates.  `grunt closureSoys` and/or `grunt closureBuilder` will rebuild
+the templates or your provided Javascript and the updated versions will be
+written in the output directory.
+>>>>>>> 064e07bb8176fe028f332e1c9d3344fa7d0487fa
 
     $ make run
 
@@ -145,6 +184,7 @@ Then visit the running application [http://localhost:8080](http://localhost:8080
 
 To run your application's tests, use the command:
 
+<<<<<<< HEAD
     $ make test
 
 To deploy your application to appengine, use:
@@ -209,3 +249,26 @@ Apache 2.0. See [LICENSE](LICENSE)
 [docker_osx_install]: https://docs.docker.com/installation/mac/  "Docker"
 [gae-secure-scaffold-python]: https://github.com/google/gae-secure-scaffold-python
 [thrdprty]: https://developers.google.com/appengine/docs/python/tools/libraries27  "Appengine third-party libraries"
+=======
+## Notes
+----
+Files in `js/` are compiled by the Closure Compiler (if available) and placed in
+`out/static/app.js`.  Included in this compilation pass is the the output of
+the `closureSoys:js` task (intermediate artifacts: out/generated/js/\*.js).
+
+Closure Templates that you provide are also compiled using the Python backend,
+and are available using the constants.CLOSURE template strategy (the default).
+The generated source code is stored in out/generated/\*.py.  To use them,
+pass the callable template as the first argument to render(), and a dictionary
+containing the template values as the second argument, e.g.:
+
+    from generated import helloworld
+    
+    [...]
+    
+    self.render(helloworld.helloWorld, { 'name': 'first last' })
+
+The `/static` and `/template` directories are replicated in `out/`, and the
+files in `src/` are rebased into `out/` (so `src/base/foo.py` becomes
+`out/base/foo.py`).
+>>>>>>> 064e07bb8176fe028f332e1c9d3344fa7d0487fa

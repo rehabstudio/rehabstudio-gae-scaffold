@@ -1,21 +1,23 @@
-gaescaffoldserver:
-  image: rehabstudio/appengine-dev
-  command: make -C /app run
-  user: root
-  working_dir: /app
-  volumes:
-    - ../src/server:/app
-    - /home/aeuser
-    - ../ops:/home/aeuser/creds
-  ports:
-    - 0.0.0.0:8080:8080
-    - 8000:8000
+version: '2.0'
+services:
+    backend:
+      image: rehabstudio/appengine-dev
+      command: make -C /app run
+      user: root
+      working_dir: /app
+      volumes:
+        - ../src/server:/app
+        - /home/aeuser
+        - ../ops:/home/aeuser/creds
+      ports:
+        - 0.0.0.0:8080:8080
+        - 8000:8000
 
-gaescaffoldclient:
-  image: node:latest
-  command: make watch
-  working_dir: /src
-  volumes:
-    - ../src/client:/src
-    - ../src/server:/server
-    - /src/node_modules
+    frontend:
+      image: node:latest
+      command: make watch
+      working_dir: /src
+      volumes:
+        - ../src/client:/src
+        - ../src/server:/server
+        - /src/node_modules

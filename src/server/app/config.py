@@ -65,11 +65,21 @@ CONFIG = {
     # such as unsafe-inline or unsafe-eval is highly discouraged, as these
     # may lead to XSS attacks.
     'csp_policy': {
+        'base-uri': '\'self\'',
         'font-src':    '\'self\'',
         'frame-src':   '\'self\'',
-        'script-src':  '\'self\'',
+        'script-src': ' '.join([
+            constants.CSP_NONCE_PLACEHOLDER_FORMAT,
+            # Propagate trust to dynamically created scripts.
+            '\'strict-dynamic\' ',
+            # Fallback. Ignored in presence of a nonce
+            '\'unsafe-inline\' ',
+            # Fallback. Ignored in presence of strict-dynamic.
+            'https: http:'
+        ]),
         'style-src':   '\'self\'',
         'img-src':     '\'self\'',
+        'object-src': '\'none\'',
         # fallback
         'default-src': '\'self\'',
         'report-uri':  '/csp',
@@ -80,6 +90,11 @@ CONFIG = {
         'globals': {
             'uri_for': webapp2.uri_for,
             'logout_url': users.create_logout_url,
+        },
+        'environment_args': {
+            'autoescape': True,
+            'extensions': ['jinja2.ext.with_'],
+            'auto_reload': constants.DEBUG
         },
         'filters': {},
     },

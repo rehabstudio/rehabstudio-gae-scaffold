@@ -1,6 +1,6 @@
 COMPOSE = docker-compose -f ./ops/docker-compose.yml
-SERVER = gaescaffoldserver
-CLIENT = gaescaffoldclient
+SERVER = backend
+CLIENT = frontend
 
 CONTAINER = $(SERVER)
 
@@ -8,12 +8,8 @@ CONTAINER = $(SERVER)
 # Make the deploy target configurable on the command line
 # user can pass `app=<appname>` or `version=<version>` to control where the
 # app gets deployed
-ifndef app
-	app = gae-secure-scaffold
-endif
-ifndef version
-	version = development
-endif
+app ?= gae-secure-scaffold
+version ?= development
 
 
 help:
@@ -38,7 +34,7 @@ test:
 build:
 	$(COMPOSE) run $(CLIENT) make build
 
-watch: 
+watch:
 	$(COMPOSE) run $(CLIENT) make watch
 
 
